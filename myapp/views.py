@@ -180,12 +180,14 @@ def dashboard(request):
 
 @login_required
 def logout_view(request):
-    # Handle both GET and POST requests
-    if request.method == 'GET' or request.method == 'POST':
-        logout(request)
-        messages.success(request, 'Successfully logged out!')
-        return redirect('login')
-    return HttpResponseForbidden("Invalid request method.")
+    """
+    Custom logout view that handles both GET and POST requests.
+    This overrides Django's default LogoutView which only accepts POST.
+    """
+    # Log the user out regardless of request method
+    logout(request)
+    messages.success(request, 'Successfully logged out!')
+    return redirect('login')
 
 @login_required
 def profile(request, user_id=None):

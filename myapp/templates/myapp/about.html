@@ -1,0 +1,455 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}About Us - Car Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://source.unsplash.com/1600x500/?cars,team');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 100px 0;
+        margin-bottom: 50px;
+        text-align: center;
+        border-radius: 10px;
+    }
+    
+    .about-header h1 {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    .about-header p {
+        font-size: 1.2rem;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    
+    .section-title {
+        color: var(--primary-color);
+        margin-bottom: 30px;
+        position: relative;
+        padding-bottom: 15px;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: var(--accent-color);
+    }
+    
+    .mission-vision {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 50px 0;
+        border-radius: 10px;
+        margin-bottom: 50px;
+    }
+    
+    .mission-vision .card {
+        border: none;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 30px;
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .mission-vision .card:hover {
+        transform: translateY(-10px);
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .mission-vision .icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        color: var(--light-color);
+    }
+    
+    .team-member {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .team-member img {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 15px;
+        border: 5px solid var(--primary-color);
+    }
+    
+    .team-member h5 {
+        margin-bottom: 5px;
+        color: var(--primary-color);
+    }
+    
+    .team-member .position {
+        font-style: italic;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+    
+    .team-member .social a {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        line-height: 32px;
+        margin: 0 5px;
+        transition: all 0.3s ease;
+    }
+    
+    .team-member .social a:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-3px);
+    }
+    
+    .timeline {
+        position: relative;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .timeline::after {
+        content: '';
+        position: absolute;
+        width: 6px;
+        background-color: var(--secondary-color);
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        margin-left: -3px;
+    }
+    
+    .timeline-container {
+        padding: 10px 40px;
+        position: relative;
+        background-color: inherit;
+        width: 50%;
+    }
+    
+    .timeline-container::after {
+        content: '';
+        position: absolute;
+        width: 25px;
+        height: 25px;
+        right: -13px;
+        background-color: white;
+        border: 4px solid var(--accent-color);
+        top: 15px;
+        border-radius: 50%;
+        z-index: 1;
+    }
+    
+    .left {
+        left: 0;
+    }
+    
+    .right {
+        left: 50%;
+    }
+    
+    .left::before {
+        content: " ";
+        height: 0;
+        position: absolute;
+        top: 22px;
+        width: 0;
+        z-index: 1;
+        right: 30px;
+        border: medium solid var(--secondary-color);
+        border-width: 10px 0 10px 10px;
+        border-color: transparent transparent transparent var(--secondary-color);
+    }
+    
+    .right::before {
+        content: " ";
+        height: 0;
+        position: absolute;
+        top: 22px;
+        width: 0;
+        z-index: 1;
+        left: 30px;
+        border: medium solid var(--secondary-color);
+        border-width: 10px 10px 10px 0;
+        border-color: transparent var(--secondary-color) transparent transparent;
+    }
+    
+    .right::after {
+        left: -12px;
+    }
+    
+    .timeline-content {
+        padding: 20px 30px;
+        background-color: white;
+        position: relative;
+        border-radius: 6px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .timeline-content h3 {
+        color: var(--primary-color);
+    }
+    
+    .timeline-year {
+        background-color: var(--primary-color);
+        color: white;
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    @media screen and (max-width: 768px) {
+        .timeline::after {
+            left: 31px;
+        }
+        
+        .timeline-container {
+            width: 100%;
+            padding-left: 70px;
+            padding-right: 25px;
+        }
+        
+        .timeline-container::before {
+            left: 60px;
+            border: medium solid var(--secondary-color);
+            border-width: 10px 10px 10px 0;
+            border-color: transparent var(--secondary-color) transparent transparent;
+        }
+        
+        .left::after, .right::after {
+            left: 18px;
+        }
+        
+        .right {
+            left: 0%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- About Header -->
+<div class="about-header">
+    <div class="container">
+        <h1>About Our Car Rental System</h1>
+        <p>Providing premium car rental services with a commitment to quality, affordability, and exceptional customer experience.</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Our Story Section -->
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <h2 class="section-title">Our Story</h2>
+            <p>Founded in 2010, Car Rental System began with a simple vision: to make car rentals accessible, affordable, and hassle-free for everyone. What started as a small local business with just 5 cars has now grown into one of the leading car rental services in the region.</p>
+            <p>Our journey has been marked by a relentless pursuit of excellence, customer satisfaction, and innovation. We've continuously expanded our fleet, improved our services, and embraced technology to enhance the rental experience.</p>
+            <p>Today, we're proud to offer a diverse range of vehicles to meet every need and budget, from economical options for everyday use to luxury cars for special occasions.</p>
+        </div>
+        <div class="col-md-6">
+            <img src="https://source.unsplash.com/600x400/?car,luxury" alt="Our Story" class="img-fluid rounded">
+        </div>
+    </div>
+    
+    <!-- Mission & Vision Section -->
+    <div class="mission-vision">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <div class="card">
+                        <div class="text-center">
+                            <i class="fas fa-bullseye icon"></i>
+                            <h3>Our Mission</h3>
+                        </div>
+                        <p>To provide exceptional car rental services that exceed customer expectations through quality vehicles, competitive pricing, and personalized service, while maintaining the highest standards of safety and reliability.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="text-center">
+                            <i class="fas fa-eye icon"></i>
+                            <h3>Our Vision</h3>
+                        </div>
+                        <p>To be the most trusted and preferred car rental service, recognized for our commitment to excellence, innovation, and customer satisfaction, setting new standards in the industry and expanding our reach globally.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Our Values Section -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h2 class="section-title">Our Values</h2>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-medal fa-3x mb-3" style="color: var(--primary-color);"></i>
+                    <h4>Excellence</h4>
+                    <p>We strive for excellence in every aspect of our service, from the quality of our vehicles to the professionalism of our staff.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-handshake fa-3x mb-3" style="color: var(--primary-color);"></i>
+                    <h4>Integrity</h4>
+                    <p>We conduct our business with honesty, transparency, and ethical practices, building trust with our customers and partners.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x mb-3" style="color: var(--primary-color);"></i>
+                    <h4>Customer Focus</h4>
+                    <p>We put our customers at the center of everything we do, listening to their needs and continuously improving our services.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Our Team Section -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h2 class="section-title">Our Team</h2>
+            <p class="mb-4">Meet the dedicated professionals behind our success.</p>
+        </div>
+        <div class="col-md-3">
+            <div class="team-member">
+                <img src="https://source.unsplash.com/200x200/?person,man" alt="John Doe">
+                <h5>John Doe</h5>
+                <p class="position">CEO & Founder</p>
+                <p>With over 15 years in the automotive industry, John leads our team with vision and passion.</p>
+                <div class="social">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="team-member">
+                <img src="https://source.unsplash.com/200x200/?person,woman" alt="Jane Smith">
+                <h5>Jane Smith</h5>
+                <p class="position">Operations Manager</p>
+                <p>Jane ensures our day-to-day operations run smoothly and efficiently.</p>
+                <div class="social">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="team-member">
+                <img src="https://source.unsplash.com/200x200/?person,man2" alt="Michael Johnson">
+                <h5>Michael Johnson</h5>
+                <p class="position">Fleet Manager</p>
+                <p>Michael oversees our diverse fleet of vehicles, ensuring they're always in top condition.</p>
+                <div class="social">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="team-member">
+                <img src="https://source.unsplash.com/200x200/?person,woman2" alt="Sarah Williams">
+                <h5>Sarah Williams</h5>
+                <p class="position">Customer Service Lead</p>
+                <p>Sarah leads our customer service team, dedicated to providing exceptional support.</p>
+                <div class="social">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Our History Section -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h2 class="section-title">Our Journey</h2>
+            <p class="mb-4">A timeline of our growth and achievements over the years.</p>
+        </div>
+        <div class="col-md-12">
+            <div class="timeline">
+                <div class="timeline-container left">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2010</div>
+                        <h3>The Beginning</h3>
+                        <p>Founded with a small fleet of 5 cars, our journey began in a small office downtown.</p>
+                    </div>
+                </div>
+                <div class="timeline-container right">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2013</div>
+                        <h3>Expansion</h3>
+                        <p>Expanded our fleet to 25 vehicles and opened our second location across town.</p>
+                    </div>
+                </div>
+                <div class="timeline-container left">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2016</div>
+                        <h3>Going Digital</h3>
+                        <p>Launched our online booking system and mobile app for a seamless rental experience.</p>
+                    </div>
+                </div>
+                <div class="timeline-container right">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2019</div>
+                        <h3>Luxury Fleet</h3>
+                        <p>Introduced our premium collection of luxury vehicles to cater to high-end customers.</p>
+                    </div>
+                </div>
+                <div class="timeline-container left">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2022</div>
+                        <h3>Regional Leader</h3>
+                        <p>Recognized as the leading car rental service in the region with a fleet of over 100 vehicles.</p>
+                    </div>
+                </div>
+                <div class="timeline-container right">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2023</div>
+                        <h3>Today</h3>
+                        <p>Continuing to grow and innovate, with plans for nationwide expansion and new service offerings.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Call to Action -->
+    <div class="row mb-5">
+        <div class="col-md-12 text-center">
+            <div class="card bg-light p-5">
+                <h2 class="mb-3">Ready to Experience Our Service?</h2>
+                <p class="mb-4">Browse our diverse collection of vehicles and book your rental today!</p>
+                <div>
+                    <a href="{% url 'car_list' %}" class="btn btn-primary btn-lg me-3">View Cars</a>
+                    <a href="{% url 'contact' %}" class="btn btn-secondary btn-lg">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

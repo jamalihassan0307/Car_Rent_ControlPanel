@@ -288,7 +288,7 @@ def add_booking(request, car_id):
     # For admin and entry operator, get list of users for dropdown
     users = None
     if is_admin(request.user) or is_entry_operator(request.user):
-        users = User.objects.all().order_by('username')
+        users = User.objects.all().order_by('username').filter(role=1)
     
     if request.method == 'POST':
         form = BookingForm(request.POST)
@@ -299,6 +299,7 @@ def add_booking(request, car_id):
             if (is_admin(request.user) or is_entry_operator(request.user)) and 'user' in request.POST:
                 user_id = request.POST.get('user')
                 booking_user = get_object_or_404(User, id=user_id)
+                
                 booking.user = booking_user
             else:
                 booking.user = request.user

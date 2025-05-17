@@ -12,7 +12,7 @@ urlpatterns = [
     # Authentication
     path('login/', views.user_login, name='login'),
     path('register/', views.register, name='register'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('logout/', auth_views.LogoutView.as_view(template_name='myapp/login.html'), name='logout'),
     
     # Password management
     path('password_change/', auth_views.PasswordChangeView.as_view(template_name='myapp/password_change_form.html'), name='password_change'),
@@ -46,4 +46,6 @@ urlpatterns = [
     path('messages/', views.message_list, name='message_list'),
     path('messages/<int:message_id>/', views.message_detail, name='message_detail'),
     path('messages/mark-read/<int:message_id>/', views.mark_message_read, name='mark_message_read'),
+    path('messages/mark-all-read/', views.mark_all_messages_read, name='mark_all_messages_read'),
+    path('messages/delete/<int:message_id>/', views.delete_message, name='delete_message'),
 ]

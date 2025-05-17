@@ -1,0 +1,170 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Edit Car - Car Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-car-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1558979158-65a1eaa08691?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&h=400&q=80');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .form-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        margin-bottom: 30px;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: var(--primary-color);
+    }
+    
+    .btn-submit {
+        background-color: var(--primary-color);
+        border: none;
+        padding: 12px 25px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit:hover {
+        background-color: var(--secondary-color);
+    }
+    
+    .section-title {
+        color: var(--primary-color);
+        margin-bottom: 30px;
+        position: relative;
+        padding-bottom: 15px;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: var(--accent-color);
+    }
+    
+    .car-current-image {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .car-current-image img {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Edit Car Header -->
+<div class="edit-car-header">
+    <div class="container">
+        <h1>Edit Car</h1>
+        <p class="lead">Update details for {{ car.brand }} {{ car.model }}</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="form-container">
+                <h2 class="section-title">Car Details</h2>
+                
+                {% if car.image %}
+                <div class="car-current-image">
+                    <p class="mb-2 text-muted">Current Image:</p>
+                    <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}">
+                </div>
+                {% endif %}
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_brand" class="form-label">Brand*</label>
+                            {{ form.brand.errors }}
+                            <input type="text" name="brand" id="id_brand" class="form-control" value="{{ form.brand.value|default:car.brand }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_model" class="form-label">Model*</label>
+                            {{ form.model.errors }}
+                            <input type="text" name="model" id="id_model" class="form-control" value="{{ form.model.value|default:car.model }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_year" class="form-label">Year*</label>
+                            {{ form.year.errors }}
+                            <input type="number" name="year" id="id_year" class="form-control" value="{{ form.year.value|default:car.year }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_rate" class="form-label">Daily Rate ($)*</label>
+                            {{ form.rate.errors }}
+                            <input type="number" name="rate" id="id_rate" class="form-control" value="{{ form.rate.value|default:car.rate }}" step="0.01" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_status" class="form-label">Status*</label>
+                        {{ form.status.errors }}
+                        <select name="status" id="id_status" class="form-select" required>
+                            <option value="available" {% if form.status.value == 'available' or car.status == 'available' %}selected{% endif %}>Available</option>
+                            <option value="rented" {% if form.status.value == 'rented' or car.status == 'rented' %}selected{% endif %}>Rented</option>
+                            <option value="maintenance" {% if form.status.value == 'maintenance' or car.status == 'maintenance' %}selected{% endif %}>Maintenance</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_description" class="form-label">Description</label>
+                        {{ form.description.errors }}
+                        <textarea name="description" id="id_description" class="form-control" rows="4">{{ form.description.value|default:car.description }}</textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="id_image" class="form-label">Car Image</label>
+                        {{ form.image.errors }}
+                        <input type="file" name="image" id="id_image" class="form-control" accept="image/*">
+                        <small class="text-muted">Upload a new image (leave empty to keep current image)</small>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'car_detail' car.id %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Car Details
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-submit">
+                            <i class="fas fa-save me-2"></i> Update Car
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

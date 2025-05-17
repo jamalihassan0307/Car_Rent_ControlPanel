@@ -1,0 +1,235 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Book Car - Car Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .booking-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&h=400&q=80');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .form-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        margin-bottom: 30px;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: var(--primary-color);
+    }
+    
+    .car-details {
+        margin-bottom: 30px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .car-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .car-title {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+    }
+    
+    .car-price {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--accent-color);
+        margin-bottom: 15px;
+    }
+    
+    .section-title {
+        color: var(--primary-color);
+        margin-bottom: 30px;
+        position: relative;
+        padding-bottom: 15px;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: var(--accent-color);
+    }
+    
+    .total-cost {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Booking Header -->
+<div class="booking-header">
+    <div class="container">
+        <h1>Book a Car</h1>
+        <p class="lead">Complete your reservation for {{ car.brand }} {{ car.model }}</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="form-container">
+                <!-- Car Details -->
+                <div class="car-details">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% if car.image %}
+                                <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" class="car-image">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1542362567-b07e54358753?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80" alt="{{ car.brand }} {{ car.model }}" class="car-image">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h3 class="car-title">{{ car.brand }} {{ car.model }}</h3>
+                            <p class="car-price">${{ car.rate }}/day</p>
+                            <div class="mb-2">
+                                <span class="badge {% if car.status == 'available' %}bg-success{% elif car.status == 'rented' %}bg-danger{% else %}bg-warning{% endif %}">
+                                    {{ car.get_status_display }}
+                                </span>
+                            </div>
+                            {% if car.description %}
+                                <p>{{ car.description }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Booking Form -->
+                <h2 class="section-title">Reservation Details</h2>
+                <form method="post" id="booking-form">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_date_get" class="form-label">Pickup Date*</label>
+                            {{ form.date_get.errors }}
+                            <input type="date" name="date_get" id="id_date_get" class="form-control date-input" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_date_return" class="form-label">Return Date*</label>
+                            {{ form.date_return.errors }}
+                            <input type="date" name="date_return" id="id_date_return" class="form-control date-input" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_special_requests" class="form-label">Special Requests</label>
+                        {{ form.special_requests.errors }}
+                        <textarea name="special_requests" id="id_special_requests" class="form-control" rows="3" placeholder="Any special requests or additional information..."></textarea>
+                    </div>
+                    
+                    <div class="total-cost" id="total-cost">
+                        <div class="d-flex justify-content-between">
+                            <span>Total Cost:</span>
+                            <span id="cost-amount">$0.00</span>
+                        </div>
+                        <div class="small text-muted" id="days-calculation"></div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'car_detail' car.id %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Car Details
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-calendar-check me-2"></i> Confirm Booking
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateGetInput = document.getElementById('id_date_get');
+        const dateReturnInput = document.getElementById('id_date_return');
+        const totalCostDiv = document.getElementById('total-cost');
+        const costAmountSpan = document.getElementById('cost-amount');
+        const daysCalculationDiv = document.getElementById('days-calculation');
+        
+        // Set minimum dates to today
+        const today = new Date();
+        const todayFormatted = today.toISOString().split('T')[0];
+        dateGetInput.min = todayFormatted;
+        dateReturnInput.min = todayFormatted;
+        
+        // Calculate total cost when dates change
+        function calculateTotalCost() {
+            const dateGet = new Date(dateGetInput.value);
+            const dateReturn = new Date(dateReturnInput.value);
+            
+            if (dateGetInput.value && dateReturnInput.value) {
+                // Calculate days difference
+                const timeDiff = dateReturn - dateGet;
+                const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                
+                if (days > 0) {
+                    // Calculate cost
+                    const dailyRate = {{ car.rate }};
+                    const totalCost = days * dailyRate;
+                    
+                    // Update display
+                    costAmountSpan.textContent = '$' + totalCost.toFixed(2);
+                    daysCalculationDiv.textContent = days + ' days × $' + dailyRate + '/day';
+                    totalCostDiv.style.display = 'block';
+                } else {
+                    totalCostDiv.style.display = 'none';
+                    if (days < 0) {
+                        alert('Return date must be after pickup date');
+                        dateReturnInput.value = '';
+                    }
+                }
+            }
+        }
+        
+        dateGetInput.addEventListener('change', function() {
+            // Update return date minimum
+            dateReturnInput.min = dateGetInput.value;
+            calculateTotalCost();
+        });
+        
+        dateReturnInput.addEventListener('change', calculateTotalCost);
+    });
+</script>
+{% endblock %} 

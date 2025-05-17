@@ -182,9 +182,19 @@ def dashboard(request):
 
 # Profile Management
 @login_required
-def profile(request):
-    user = request.user
-    return render(request, 'myapp/profile.html', {'user': user})
+def profile(request, user_id=None):
+    if user_id:
+        # If a user_id is provided, show that user's profile
+        profile_user = get_object_or_404(User, id=user_id)
+    else:
+        # Otherwise, show the current user's profile
+        profile_user = request.user
+    
+    # Only admin, resource manager, and the user themselves can view a user's profile
+    if profile_user != request.user and not (is_admin(request.user) or is_resource_manager(request.user)):
+        return HttpResponseForbidden("You don't have permission to view this profile.")
+    
+    return render(request, 'myapp/profile.html', {'user': profile_user})
 
 @login_required
 def edit_profile(request):

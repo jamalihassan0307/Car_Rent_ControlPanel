@@ -1,0 +1,581 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Car Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://source.unsplash.com/1600x400/?car,dashboard');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 40px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+    }
+    
+    .dashboard-welcome {
+        font-size: 1.1rem;
+    }
+    
+    .stats-card {
+        border-radius: 10px;
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stats-card .card-body {
+        padding: 25px;
+    }
+    
+    .stats-card .icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        color: var(--primary-color);
+    }
+    
+    .stats-card .stats-value {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .stats-card .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .stats-card.primary {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .stats-card.primary .icon,
+    .stats-card.primary .stats-label {
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .stats-card.secondary {
+        background-color: var(--secondary-color);
+        color: white;
+    }
+    
+    .stats-card.secondary .icon,
+    .stats-card.secondary .stats-label {
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .stats-card.accent {
+        background-color: var(--accent-color);
+        color: #212529;
+    }
+    
+    .stats-card.accent .icon,
+    .stats-card.accent .stats-label {
+        color: rgba(0, 0, 0, 0.6);
+    }
+    
+    .stats-card.light {
+        background-color: var(--light-color);
+        color: #212529;
+    }
+    
+    .stats-card.light .icon,
+    .stats-card.light .stats-label {
+        color: rgba(0, 0, 0, 0.6);
+    }
+    
+    .recent-activity {
+        margin-top: 30px;
+    }
+    
+    .activity-card {
+        border-radius: 10px;
+        border: none;
+    }
+    
+    .activity-card .card-header {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 10px 10px 0 0;
+    }
+    
+    .activity-item {
+        padding: 15px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-item .time {
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+    
+    .activity-item .status {
+        font-weight: bold;
+    }
+    
+    .status-pending {
+        color: #ffc107;
+    }
+    
+    .status-approved {
+        color: #28a745;
+    }
+    
+    .status-returned {
+        color: #17a2b8;
+    }
+    
+    .status-cancelled {
+        color: #dc3545;
+    }
+    
+    .message-preview {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    
+    .message-preview:hover {
+        background-color: #e9ecef;
+    }
+    
+    .message-preview .subject {
+        font-weight: bold;
+    }
+    
+    .message-preview .time {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .action-buttons {
+        margin-top: 2rem;
+    }
+    
+    .action-buttons .btn {
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1>Welcome, {{ user.first_name|default:user.username }}</h1>
+                <p class="dashboard-welcome mb-0">
+                    {% if user.role == 1 %}
+                        Welcome to your personal dashboard! Here you can manage your bookings and profile.
+                    {% elif user.role == 2 %}
+                        Welcome to the admin dashboard! Here you can manage cars, users, bookings, and messages.
+                    {% elif user.role == 3 %}
+                        Welcome to the resource manager dashboard! Here you can manage cars and users.
+                    {% elif user.role == 4 %}
+                        Welcome to the entry operator dashboard! Here you can manage bookings.
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <p class="mb-0 text-white-50">Last login: {{ user.last_login|date:"F j, Y, g:i a" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Stats Cards -->
+    <div class="row">
+        {% if user.role == 1 %}
+            <!-- Normal User Stats -->
+            <div class="col-md-4">
+                <div class="card stats-card primary text-center">
+                    <div class="card-body">
+                        <i class="fas fa-car icon"></i>
+                        <div class="stats-value">{{ available_cars }}</div>
+                        <div class="stats-label">Available Cars</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card secondary text-center">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-check icon"></i>
+                        <div class="stats-value">{{ pending_bookings }}</div>
+                        <div class="stats-label">Pending Bookings</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card accent text-center">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle icon"></i>
+                        <div class="stats-value">{{ approved_bookings }}</div>
+                        <div class="stats-label">Active Rentals</div>
+                    </div>
+                </div>
+            </div>
+        {% elif user.role == 2 %}
+            <!-- Admin Stats -->
+            <div class="col-md-3">
+                <div class="card stats-card primary text-center">
+                    <div class="card-body">
+                        <i class="fas fa-car icon"></i>
+                        <div class="stats-value">{{ total_cars }}</div>
+                        <div class="stats-label">Total Cars</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card secondary text-center">
+                    <div class="card-body">
+                        <i class="fas fa-users icon"></i>
+                        <div class="stats-value">{{ total_users }}</div>
+                        <div class="stats-label">Registered Users</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card accent text-center">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-alt icon"></i>
+                        <div class="stats-value">{{ total_bookings }}</div>
+                        <div class="stats-label">Total Bookings</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card light text-center">
+                    <div class="card-body">
+                        <i class="fas fa-clock icon"></i>
+                        <div class="stats-value">{{ pending_approvals }}</div>
+                        <div class="stats-label">Pending Approvals</div>
+                    </div>
+                </div>
+            </div>
+        {% elif user.role == 3 %}
+            <!-- Resource Manager Stats -->
+            <div class="col-md-4">
+                <div class="card stats-card primary text-center">
+                    <div class="card-body">
+                        <i class="fas fa-car icon"></i>
+                        <div class="stats-value">{{ total_cars }}</div>
+                        <div class="stats-label">Total Cars</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card secondary text-center">
+                    <div class="card-body">
+                        <i class="fas fa-users icon"></i>
+                        <div class="stats-value">{{ total_users }}</div>
+                        <div class="stats-label">Registered Users</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card accent text-center">
+                    <div class="card-body">
+                        <i class="fas fa-car-crash icon"></i>
+                        <div class="stats-value">{{ cars_by_status.0.count|default:"0" }}</div>
+                        <div class="stats-label">Cars in Maintenance</div>
+                    </div>
+                </div>
+            </div>
+        {% elif user.role == 4 %}
+            <!-- Entry Operator Stats -->
+            <div class="col-md-4">
+                <div class="card stats-card primary text-center">
+                    <div class="card-body">
+                        <i class="fas fa-car icon"></i>
+                        <div class="stats-value">{{ available_cars }}</div>
+                        <div class="stats-label">Available Cars</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card secondary text-center">
+                    <div class="card-body">
+                        <i class="fas fa-hourglass-half icon"></i>
+                        <div class="stats-value">{{ pending_approvals }}</div>
+                        <div class="stats-label">Pending Approvals</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card accent text-center">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-check icon"></i>
+                        <div class="stats-value">{{ total_bookings }}</div>
+                        <div class="stats-label">Total Bookings</div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Quick Actions Section -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if user.role == 1 %}
+                            <!-- Normal User Actions -->
+                            <div class="col-md-3">
+                                <a href="{% url 'car_list' %}" class="btn btn-outline-primary d-block">
+                                    <i class="fas fa-search me-2"></i>Browse Cars
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{% url 'my_bookings' %}" class="btn btn-outline-secondary d-block">
+                                    <i class="fas fa-list me-2"></i>My Bookings
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{% url 'profile' %}" class="btn btn-outline-info d-block">
+                                    <i class="fas fa-user-edit me-2"></i>Edit Profile
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{% url 'contact' %}" class="btn btn-outline-dark d-block">
+                                    <i class="fas fa-envelope me-2"></i>Contact Support
+                                </a>
+                            </div>
+                        {% elif user.role == 2 %}
+                            <!-- Admin Actions -->
+                            <div class="col-md-3">
+                                <a href="{% url 'manage_bookings' %}" class="btn btn-outline-primary d-block">
+                                    <i class="fas fa-tasks me-2"></i>Manage Bookings
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{% url 'add_car' %}" class="btn btn-outline-secondary d-block">
+                                    <i class="fas fa-car-side me-2"></i>Add New Car
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{% url 'add_user' %}" class="btn btn-outline-info d-block">
+                                    <i class="fas fa-user-plus me-2"></i>Add New User
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="{% url 'message_list' %}" class="btn btn-outline-dark d-block">
+                                    <i class="fas fa-envelope me-2"></i>View Messages
+                                </a>
+                            </div>
+                        {% elif user.role == 3 %}
+                            <!-- Resource Manager Actions -->
+                            <div class="col-md-4">
+                                <a href="{% url 'add_car' %}" class="btn btn-outline-primary d-block">
+                                    <i class="fas fa-car-side me-2"></i>Add New Car
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{% url 'user_list' %}" class="btn btn-outline-secondary d-block">
+                                    <i class="fas fa-users me-2"></i>Manage Users
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{% url 'car_list' %}" class="btn btn-outline-info d-block">
+                                    <i class="fas fa-list me-2"></i>View Car Inventory
+                                </a>
+                            </div>
+                        {% elif user.role == 4 %}
+                            <!-- Entry Operator Actions -->
+                            <div class="col-md-4">
+                                <a href="{% url 'manage_bookings' %}" class="btn btn-outline-primary d-block">
+                                    <i class="fas fa-tasks me-2"></i>Manage Bookings
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{% url 'car_list' %}" class="btn btn-outline-secondary d-block">
+                                    <i class="fas fa-car me-2"></i>View Available Cars
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{% url 'add_booking' 1 %}" class="btn btn-outline-info d-block">
+                                    <i class="fas fa-calendar-plus me-2"></i>Create New Booking
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity Section -->
+    <div class="row mt-4">
+        <!-- Left Column -->
+        <div class="col-md-8">
+            <div class="card activity-card">
+                <div class="card-header">
+                    <i class="fas fa-history me-2"></i> Recent Activities
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_bookings %}
+                        <div class="list-group list-group-flush">
+                            {% for booking in recent_bookings %}
+                                <div class="activity-item">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>{{ booking.car.brand }} {{ booking.car.model }}</strong>
+                                        <small class="time">{{ booking.date_created|date:"M d, Y" }}</small>
+                                    </div>
+                                    <div>
+                                        {% if user.role != 1 %}
+                                            <span>User: {{ booking.user.username }}</span> - 
+                                        {% endif %}
+                                        <span class="status status-{{ booking.status }}">{{ booking.get_status_display }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <small>{{ booking.date_get|date:"M d, Y" }} to {{ booking.date_return|date:"M d, Y" }}</small>
+                                        
+                                        <div>
+                                            <a href="{% url 'car_detail' booking.car.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-car me-1"></i> Car
+                                            </a>
+                                            
+                                            {% if booking.status == 'pending' and user.role >= 2 %}
+                                                <a href="{% url 'approve_booking' booking.id %}" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-check me-1"></i> Approve
+                                                </a>
+                                            {% endif %}
+                                            
+                                            {% if booking.status == 'approved' and user.role >= 2 %}
+                                                <a href="{% url 'return_car' booking.id %}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-undo me-1"></i> Return
+                                                </a>
+                                            {% endif %}
+                                            
+                                            {% if booking.status == 'pending' %}
+                                                <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-times me-1"></i> Cancel
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        {% if user.role == 1 %}
+                            <div class="p-3 text-center">
+                                <a href="{% url 'my_bookings' %}" class="btn btn-primary">View All My Bookings</a>
+                            </div>
+                        {% else %}
+                            <div class="p-3 text-center">
+                                <a href="{% url 'manage_bookings' %}" class="btn btn-primary">View All Bookings</a>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="p-4 text-center">
+                            <i class="fas fa-calendar-times fa-3x mb-3 text-muted"></i>
+                            <h5>No Recent Bookings</h5>
+                            <p class="text-muted">There are no recent booking activities to display.</p>
+                            
+                            {% if user.role == 1 %}
+                                <a href="{% url 'car_list' %}" class="btn btn-primary">Browse Cars to Book</a>
+                            {% else %}
+                                <a href="{% url 'car_list' %}" class="btn btn-primary">View Available Cars</a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="col-md-4">
+            {% if user.role == 2 %}
+                <!-- Admin Messages Preview -->
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-envelope me-2"></i> Recent Messages
+                    </div>
+                    <div class="card-body">
+                        {% if recent_messages %}
+                            {% for message in recent_messages %}
+                                <div class="message-preview">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="subject">{{ message.subject }}</div>
+                                        <small class="time">{{ message.date_sent|date:"M d" }}</small>
+                                    </div>
+                                    <div>From: {{ message.user.username }}</div>
+                                    <div class="mt-2">
+                                        <p class="mb-1">{{ message.message|truncatechars:80 }}</p>
+                                        <a href="{% url 'message_detail' message.id %}" class="btn btn-sm btn-outline-primary">Read</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <div class="text-center mt-3">
+                                <a href="{% url 'message_list' %}" class="btn btn-primary">View All Messages</a>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+                                <p>No unread messages</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <!-- System Status Card -->
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-chart-line me-2"></i> System Status
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>Car Availability</h6>
+                            <div class="progress" style="height: 20px;">
+                                {% with available_percent=available_cars|default:0|mul:100|div:total_cars|default:1 %}
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ available_percent }}%;" aria-valuenow="{{ available_percent }}" aria-valuemin="0" aria-valuemax="100">{{ available_percent }}%</div>
+                                {% endwith %}
+                            </div>
+                            <small class="text-muted">{{ available_cars|default:0 }} out of {{ total_cars|default:0 }} cars available</small>
+                        </div>
+                        
+                        <hr>
+                        
+                        <h6>Cars by Status</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Available
+                                <span class="badge bg-success rounded-pill">{{ available_cars|default:0 }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Rented
+                                <span class="badge bg-danger rounded-pill">{{ rented_cars|default:0 }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Maintenance
+                                <span class="badge bg-warning rounded-pill">{{ maintenance_cars|default:0 }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

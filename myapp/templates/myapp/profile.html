@@ -193,7 +193,7 @@
                         </div>
                         
                         <div class="col-md-8 profile-details">
-                            <form method="post" action="{% url 'profile' %}">
+                            <form method="post" action="{% url 'profile' %}" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="row">
                                     <div class="col-md-6 detail-row">

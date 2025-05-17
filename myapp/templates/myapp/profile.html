@@ -6,7 +6,7 @@
 {% block extra_css %}
 <style>
     .profile-header {
-        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://source.unsplash.com/1600x400/?profile,user');
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1496302662116-35cc4f36df92?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&h=400&q=80');
         background-size: cover;
         background-position: center;
         color: white;
@@ -170,7 +170,7 @@
                                 {% if user.userprofile.photo %}
                                     <img src="{{ user.userprofile.photo.url }}" alt="{{ user.username }}" class="profile-image">
                                 {% else %}
-                                    <img src="https://source.unsplash.com/150x150/?person" alt="{{ user.username }}" class="profile-image">
+                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&h=150&q=80" alt="{{ user.username }}" class="profile-image">
                                 {% endif %}
                                 <label for="profile_photo" class="btn">
                                     <i class="fas fa-camera"></i>

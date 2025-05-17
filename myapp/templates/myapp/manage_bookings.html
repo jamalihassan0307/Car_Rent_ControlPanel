@@ -1,0 +1,397 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Manage Bookings - Car Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bookings-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://source.unsplash.com/1600x400/?car,booking');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 50px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+    }
+    
+    .filters-card {
+        border-radius: 10px;
+        margin-bottom: 25px;
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .filters-card .card-header {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-bottom: none;
+        font-weight: bold;
+    }
+    
+    .filter-form .form-select,
+    .filter-form .form-control {
+        background-color: rgba(255, 255, 255, 0.9);
+        border: none;
+    }
+    
+    .filter-form .btn-light {
+        background-color: white;
+        border: none;
+    }
+    
+    .booking-status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-approved {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-returned {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .status-cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .booking-table th {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+    }
+    
+    .booking-table {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .booking-table td {
+        vertical-align: middle;
+    }
+    
+    .no-bookings {
+        text-align: center;
+        padding: 100px 20px;
+    }
+    
+    .no-bookings i {
+        font-size: 4rem;
+        color: var(--secondary-color);
+        margin-bottom: 20px;
+    }
+    
+    .action-btn {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    
+    .booking-details-row {
+        background-color: #f8f9fa;
+        display: none;
+    }
+    
+    .booking-details-row.show {
+        display: table-row;
+    }
+    
+    .booking-details-content {
+        padding: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Bookings Header -->
+<div class="bookings-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1>Manage Bookings</h1>
+                <p class="lead mb-0">Review, approve, and manage all car rental bookings</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'car_list' %}" class="btn btn-outline-light">
+                    <i class="fas fa-car me-2"></i> View Available Cars
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filters Section -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card filters-card">
+                <div class="card-header">
+                    <i class="fas fa-filter me-2"></i> Filter Bookings
+                </div>
+                <div class="card-body">
+                    <form method="get" class="filter-form row g-3">
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="">All Status</option>
+                                <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Approved</option>
+                                <option value="returned" {% if request.GET.status == 'returned' %}selected{% endif %}>Returned</option>
+                                <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="user" class="form-label">User</label>
+                            <input type="text" class="form-control" id="user" name="user" placeholder="Username" value="{{ request.GET.user|default:'' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="car" class="form-label">Car</label>
+                            <input type="text" class="form-control" id="car" name="car" placeholder="Brand or Model" value="{{ request.GET.car|default:'' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="date" class="form-label">Date Range</label>
+                            <input type="date" class="form-control" id="date" name="date" value="{{ request.GET.date|default:'' }}">
+                        </div>
+                        <div class="col-md-12 text-end">
+                            <button type="submit" class="btn btn-light">
+                                <i class="fas fa-search me-2"></i> Search
+                            </button>
+                            <a href="{% url 'manage_bookings' %}" class="btn btn-outline-light">
+                                <i class="fas fa-redo me-2"></i> Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center mb-3">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">{{ total_bookings|default:"0" }}</h5>
+                    <p class="card-text">Total Bookings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center mb-3">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">{{ pending_count|default:"0" }}</h5>
+                    <p class="card-text">Pending Approvals</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center mb-3">
+                <div class="card-body">
+                    <h5 class="card-title text-success">{{ approved_count|default:"0" }}</h5>
+                    <p class="card-text">Active Rentals</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center mb-3">
+                <div class="card-body">
+                    <h5 class="card-title text-info">{{ returned_count|default:"0" }}</h5>
+                    <p class="card-text">Completed Rentals</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bookings Table -->
+    {% if bookings %}
+        <div class="table-responsive">
+            <table class="table table-hover booking-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>User</th>
+                        <th>Car</th>
+                        <th>Duration</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                        <tr>
+                            <td>{{ booking.id }}</td>
+                            <td>
+                                <a href="{% url 'profile' booking.user.id %}">{{ booking.user.username }}</a>
+                                <div><small class="text-muted">{{ booking.user.email }}</small></div>
+                            </td>
+                            <td>
+                                <a href="{% url 'car_detail' booking.car.id %}">{{ booking.car.brand }} {{ booking.car.model }}</a>
+                                <div><small class="text-muted">${{ booking.car.rate }}/day</small></div>
+                            </td>
+                            <td>
+                                {{ booking.duration }} days
+                                <div><small class="text-muted">{{ booking.date_get|date:"M d" }} - {{ booking.date_return|date:"M d" }}</small></div>
+                            </td>
+                            <td>${{ booking.total_cost }}</td>
+                            <td>
+                                <span class="booking-status status-{{ booking.status }}">
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ booking.date_created|date:"M d, Y" }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary booking-details-toggle" data-booking-id="{{ booking.id }}">
+                                        <i class="fas fa-info-circle"></i>
+                                    </button>
+                                    
+                                    {% if booking.status == 'pending' %}
+                                        <a href="{% url 'approve_booking' booking.id %}" class="btn btn-sm btn-success action-btn">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                    {% endif %}
+                                    
+                                    {% if booking.status == 'approved' %}
+                                        <a href="{% url 'return_car' booking.id %}" class="btn btn-sm btn-info action-btn">
+                                            <i class="fas fa-undo"></i>
+                                        </a>
+                                    {% endif %}
+                                    
+                                    {% if booking.status == 'pending' %}
+                                        <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-sm btn-danger action-btn">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Booking Details Row -->
+                        <tr class="booking-details-row" id="booking-details-{{ booking.id }}">
+                            <td colspan="8">
+                                <div class="booking-details-content">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h5>Booking Details</h5>
+                                            <ul class="list-unstyled">
+                                                <li><strong>Booking ID:</strong> {{ booking.id }}</li>
+                                                <li><strong>Created On:</strong> {{ booking.date_created|date:"F j, Y, g:i a" }}</li>
+                                                <li><strong>Status:</strong> {{ booking.get_status_display }}</li>
+                                                <li><strong>Pickup Date:</strong> {{ booking.date_get|date:"F j, Y" }}</li>
+                                                <li><strong>Return Date:</strong> {{ booking.date_return|date:"F j, Y" }}</li>
+                                                <li><strong>Duration:</strong> {{ booking.duration }} days</li>
+                                                <li><strong>Total Cost:</strong> ${{ booking.total_cost }}</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5>User Information</h5>
+                                            <ul class="list-unstyled">
+                                                <li><strong>Name:</strong> {{ booking.user.get_full_name|default:booking.user.username }}</li>
+                                                <li><strong>Email:</strong> {{ booking.user.email }}</li>
+                                                <li><strong>Phone:</strong> {{ booking.user.userprofile.phone|default:"Not provided" }}</li>
+                                                <li><strong>Address:</strong> {{ booking.user.userprofile.address|default:"Not provided" }}</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if bookings.has_other_pages %}
+            <nav aria-label="Bookings pagination">
+                <ul class="pagination justify-content-center">
+                    {% if bookings.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ bookings.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.user %}&user={{ request.GET.user }}{% endif %}{% if request.GET.car %}&car={{ request.GET.car }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for i in bookings.paginator.page_range %}
+                        {% if bookings.number == i %}
+                            <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ i }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.user %}&user={{ request.GET.user }}{% endif %}{% if request.GET.car %}&car={{ request.GET.car }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if bookings.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ bookings.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.user %}&user={{ request.GET.user }}{% endif %}{% if request.GET.car %}&car={{ request.GET.car }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="no-bookings">
+            <i class="fas fa-calendar-times"></i>
+            <h3>No Bookings Found</h3>
+            <p class="text-muted mb-4">There are no bookings matching your filter criteria.</p>
+            <a href="{% url 'manage_bookings' %}" class="btn btn-primary">View All Bookings</a>
+        </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle booking details when clicking on the info button
+        const detailsToggleButtons = document.querySelectorAll('.booking-details-toggle');
+        
+        detailsToggleButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const bookingId = this.getAttribute('data-booking-id');
+                const detailsRow = document.getElementById('booking-details-' + bookingId);
+                
+                if (detailsRow.classList.contains('show')) {
+                    detailsRow.classList.remove('show');
+                } else {
+                    // Hide all other details rows
+                    document.querySelectorAll('.booking-details-row.show').forEach(row => {
+                        row.classList.remove('show');
+                    });
+                    
+                    // Show this details row
+                    detailsRow.classList.add('show');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

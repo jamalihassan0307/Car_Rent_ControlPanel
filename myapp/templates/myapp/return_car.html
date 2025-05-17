@@ -1,0 +1,133 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Return Car - Car Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .return-car-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&h=400&q=80');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .confirmation-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .booking-details {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .car-image {
+        width: 150px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .confirm-text {
+        color: #17a2b8;
+        font-weight: bold;
+        margin: 30px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Return Car Header -->
+<div class="return-car-header">
+    <div class="container">
+        <h1>Process Car Return</h1>
+        <p class="lead">Confirm return of {{ booking.car.brand }} {{ booking.car.model }}</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="confirmation-container">
+                <h2>Return Confirmation</h2>
+                
+                <div class="booking-details">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            {% if booking.car.image %}
+                                <img src="{{ booking.car.image.url }}" alt="{{ booking.car.brand }} {{ booking.car.model }}" class="car-image">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1542362567-b07e54358753?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80" alt="{{ booking.car.brand }} {{ booking.car.model }}" class="car-image">
+                            {% endif %}
+                            <h5>{{ booking.car.brand }} {{ booking.car.model }}</h5>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="info-row">
+                                <strong>Booking ID:</strong>
+                                <span>{{ booking.id }}</span>
+                            </div>
+                            <div class="info-row">
+                                <strong>Customer:</strong>
+                                <span>{{ booking.user.get_full_name|default:booking.user.username }}</span>
+                            </div>
+                            <div class="info-row">
+                                <strong>Pickup Date:</strong>
+                                <span>{{ booking.date_get|date:"F j, Y" }}</span>
+                            </div>
+                            <div class="info-row">
+                                <strong>Return Date:</strong>
+                                <span>{{ booking.date_return|date:"F j, Y" }}</span>
+                            </div>
+                            <div class="info-row">
+                                <strong>Total Cost:</strong>
+                                <span>${{ booking.car.rate }} × {{ booking.duration }} days = ${{ booking.total_cost }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="confirm-text">
+                    <i class="fas fa-car-side me-2"></i>
+                    Are you sure you want to process the return of this car?
+                </p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center">
+                        <a href="{% url 'manage_bookings' %}" class="btn btn-secondary me-3">
+                            <i class="fas fa-times me-2"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-info">
+                            <i class="fas fa-undo me-2"></i> Confirm Return
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

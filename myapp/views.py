@@ -201,6 +201,10 @@ def profile(request, user_id=None):
         profile_user.last_name = request.POST.get('last_name', '')
         profile_user.email = request.POST.get('email', '')
         
+        # Handle profile image upload
+        if 'profile_photo' in request.FILES:
+            profile_user.profile_image = request.FILES['profile_photo']
+        
         # Update profile info
         profile_user.profile.phone = request.POST.get('phone', '')
         profile_user.profile.address = request.POST.get('address', '')

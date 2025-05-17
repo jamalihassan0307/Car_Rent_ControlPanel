@@ -68,6 +68,17 @@ class RentDetail(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.car.brand} {self.car.model} ({self.status})"
+        
+    @property
+    def duration(self):
+        """Calculate the number of days between pickup and return dates."""
+        delta = self.date_return - self.date_get
+        return delta.days + 1  # Include both the pickup and return days
+        
+    @property
+    def total_cost(self):
+        """Calculate the total cost of the rental."""
+        return self.duration * self.car.rate
 
 class ContactMessage(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages')

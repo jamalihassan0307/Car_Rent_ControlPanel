@@ -6,7 +6,7 @@
 {% block extra_css %}
 <style>
     .bookings-header {
-        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://source.unsplash.com/1600x400/?car,booking');
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1550355291-bbee04a92027?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&h=400&q=80');
         background-size: cover;
         background-position: center;
         color: white;
@@ -203,7 +203,7 @@
                             {% if booking.car.image %}
                                 <img src="{{ booking.car.image.url }}" alt="{{ booking.car.brand }} {{ booking.car.model }}" class="car-image">
                             {% else %}
-                                <img src="https://source.unsplash.com/120x80/?car,{{ booking.car.brand }}" alt="{{ booking.car.brand }} {{ booking.car.model }}" class="car-image">
+                                <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&h=80&q=80" alt="{{ booking.car.brand }} {{ booking.car.model }}" class="car-image">
                             {% endif %}
                             
                             <div>

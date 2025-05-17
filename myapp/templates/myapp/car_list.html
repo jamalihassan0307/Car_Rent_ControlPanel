@@ -1,0 +1,237 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Cars - Car Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .car-listing-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://source.unsplash.com/1600x400/?car,luxury');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .filters-card {
+        border-radius: 10px;
+        margin-bottom: 20px;
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .filters-card .card-header {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-bottom: none;
+        font-weight: bold;
+    }
+    
+    .car-card {
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .car-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .car-image {
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .car-status {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-available {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .status-rented {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .status-maintenance {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .car-features {
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+        margin-top: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .car-feature {
+        display: flex;
+        align-items: center;
+    }
+    
+    .car-feature i {
+        margin-right: 5px;
+        color: var(--primary-color);
+    }
+    
+    .filter-form .form-select,
+    .filter-form .form-control {
+        background-color: rgba(255, 255, 255, 0.9);
+        border: none;
+    }
+    
+    .filter-form .btn-light {
+        background-color: white;
+        border: none;
+    }
+    
+    .no-cars-found {
+        text-align: center;
+        padding: 50px 0;
+    }
+    
+    .no-cars-found i {
+        font-size: 3rem;
+        color: var(--secondary-color);
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Car Listing Header -->
+<div class="car-listing-header">
+    <div class="container">
+        <h1 class="mb-3">Explore Our Car Fleet</h1>
+        <p class="lead mb-0">Choose from our wide selection of premium vehicles</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filters Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card filters-card">
+                <div class="card-header">
+                    <i class="fas fa-filter me-2"></i> Filter Cars
+                </div>
+                <div class="card-body">
+                    <form method="get" class="filter-form">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="brand" class="form-label">Brand</label>
+                                    <select name="brand" id="brand" class="form-select">
+                                        <option value="">All Brands</option>
+                                        {% for brand in brands %}
+                                            <option value="{{ brand }}" {% if request.GET.brand == brand %}selected{% endif %}>{{ brand }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select name="status" id="status" class="form-select">
+                                        <option value="">All Status</option>
+                                        <option value="available" {% if request.GET.status == 'available' %}selected{% endif %}>Available</option>
+                                        <option value="rented" {% if request.GET.status == 'rented' %}selected{% endif %}>Rented</option>
+                                        <option value="maintenance" {% if request.GET.status == 'maintenance' %}selected{% endif %}>Maintenance</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label d-block">&nbsp;</label> <!-- For alignment -->
+                                    <button type="submit" class="btn btn-light me-2">
+                                        <i class="fas fa-search me-2"></i> Search
+                                    </button>
+                                    <a href="{% url 'car_list' %}" class="btn btn-outline-light">
+                                        <i class="fas fa-redo me-2"></i> Reset
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cars Grid -->
+    <div class="row">
+        {% if cars %}
+            {% for car in cars %}
+                <div class="col-md-4">
+                    <div class="card car-card">
+                        <div class="position-relative">
+                            {% if car.image %}
+                                <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" class="card-img-top car-image">
+                            {% else %}
+                                <img src="https://source.unsplash.com/500x300/?car,{{ car.brand }}" alt="{{ car.brand }} {{ car.model }}" class="card-img-top car-image">
+                            {% endif %}
+                            
+                            <span class="car-status status-{{ car.status }}">
+                                {{ car.get_status_display }}
+                            </span>
+                        </div>
+                        
+                        <div class="card-body">
+                            <h5 class="card-title">{{ car.brand }} {{ car.model }}</h5>
+                            <p class="card-text text-primary fw-bold">${{ car.rate }}/day</p>
+                            <p class="card-text">{{ car.description|truncatechars:100 }}</p>
+                            
+                            <div class="car-features">
+                                <div class="car-feature">
+                                    <i class="fas fa-car"></i>
+                                    <span>{{ car.brand }}</span>
+                                </div>
+                                <div class="car-feature">
+                                    <i class="fas fa-tag"></i>
+                                    <span>${{ car.rate }}/day</span>
+                                </div>
+                                <div class="car-feature">
+                                    <i class="fas fa-circle"></i>
+                                    <span>{{ car.get_status_display }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-white d-flex justify-content-between">
+                            <a href="{% url 'car_detail' car.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-info-circle me-1"></i> View Details
+                            </a>
+                            {% if car.status == 'available' and user.is_authenticated %}
+                                <a href="{% url 'add_booking' car.id %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-calendar-plus me-1"></i> Book Now
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 no-cars-found">
+                <i class="fas fa-car-crash"></i>
+                <h3>No Cars Found</h3>
+                <p>Sorry, we couldn't find any cars matching your criteria.</p>
+                <a href="{% url 'car_list' %}" class="btn btn-primary mt-3">View All Cars</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,321 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Car Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://source.unsplash.com/1600x400/?profile,user');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .profile-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .profile-card {
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+    
+    .profile-card-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 20px;
+        font-weight: 500;
+    }
+    
+    .profile-image-container {
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .profile-image {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid var(--primary-color);
+    }
+    
+    .profile-image-upload {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .profile-image-upload .btn {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--primary-color);
+        color: white;
+        border: 2px solid white;
+    }
+    
+    .profile-details {
+        padding: 20px;
+    }
+    
+    .detail-row {
+        margin-bottom: 20px;
+    }
+    
+    .detail-label {
+        font-weight: 500;
+        color: var(--primary-color);
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(104, 167, 173, 0.25);
+    }
+    
+    .activity-card {
+        padding: 15px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .activity-card:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .update-password-link {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+    
+    .update-password-link:hover {
+        text-decoration: underline;
+    }
+    
+    .nav-tabs .nav-link {
+        color: #495057;
+        border: none;
+        padding: 15px 20px;
+        font-weight: 500;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: var(--primary-color);
+        background-color: transparent;
+        border-bottom: 3px solid var(--primary-color);
+    }
+    
+    .tab-content {
+        padding: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="container">
+        <h1>My Profile</h1>
+        <p class="lead">View and manage your account information</p>
+    </div>
+</div>
+
+<div class="container profile-container">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Profile Tabs -->
+            <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">
+                        <i class="fas fa-user me-2"></i> Profile Details
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">
+                        <i class="fas fa-lock me-2"></i> Security
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab" aria-controls="activity" aria-selected="false">
+                        <i class="fas fa-history me-2"></i> Recent Activity
+                    </button>
+                </li>
+            </ul>
+            
+            <!-- Tab Content -->
+            <div class="tab-content profile-card" id="profileTabsContent">
+                <!-- Profile Details Tab -->
+                <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    <div class="row">
+                        <div class="col-md-4 profile-image-container">
+                            <div class="profile-image-upload">
+                                {% if user.userprofile.photo %}
+                                    <img src="{{ user.userprofile.photo.url }}" alt="{{ user.username }}" class="profile-image">
+                                {% else %}
+                                    <img src="https://source.unsplash.com/150x150/?person" alt="{{ user.username }}" class="profile-image">
+                                {% endif %}
+                                <label for="profile_photo" class="btn">
+                                    <i class="fas fa-camera"></i>
+                                </label>
+                                <input type="file" id="profile_photo" name="profile_photo" style="display: none;">
+                            </div>
+                            <h4 class="mt-3">{{ user.get_full_name|default:user.username }}</h4>
+                            <p class="text-muted mb-0">
+                                {% if user.role == 1 %}
+                                    Normal User
+                                {% elif user.role == 2 %}
+                                    Administrator
+                                {% elif user.role == 3 %}
+                                    Resource Manager
+                                {% elif user.role == 4 %}
+                                    Entry Operator
+                                {% endif %}
+                            </p>
+                            <p class="mb-3">Member since {{ user.date_joined|date:"F j, Y" }}</p>
+                        </div>
+                        
+                        <div class="col-md-8 profile-details">
+                            <form method="post" action="{% url 'profile' %}">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6 detail-row">
+                                        <label for="first_name" class="form-label detail-label">First Name</label>
+                                        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}">
+                                    </div>
+                                    <div class="col-md-6 detail-row">
+                                        <label for="last_name" class="form-label detail-label">Last Name</label>
+                                        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}">
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 detail-row">
+                                        <label for="email" class="form-label detail-label">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
+                                    </div>
+                                    <div class="col-md-6 detail-row">
+                                        <label for="phone" class="form-label detail-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" value="{{ user.userprofile.phone|default:'' }}">
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-12 detail-row">
+                                        <label for="address" class="form-label detail-label">Address</label>
+                                        <textarea class="form-control" id="address" name="address" rows="3">{{ user.userprofile.address|default:'' }}</textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 detail-row">
+                                        <label for="city" class="form-label detail-label">City</label>
+                                        <input type="text" class="form-control" id="city" name="city" value="{{ user.userprofile.city|default:'' }}">
+                                    </div>
+                                    <div class="col-md-6 detail-row">
+                                        <label for="country" class="form-label detail-label">Country</label>
+                                        <input type="text" class="form-control" id="country" name="country" value="{{ user.userprofile.country|default:'' }}">
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i> Save Changes
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Tab -->
+                <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+                    <div class="p-4">
+                        <h4 class="mb-4">Security Settings</h4>
+                        
+                        <div class="mb-4">
+                            <h5><i class="fas fa-key me-2"></i> Password</h5>
+                            <p class="text-muted">Last changed: Never</p>
+                            <a href="{% url 'password_change' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-lock me-2"></i> Change Password
+                            </a>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="mb-4">
+                            <h5><i class="fas fa-shield-alt me-2"></i> Account Security</h5>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="email_notifications" checked>
+                                <label class="form-check-label" for="email_notifications">Email notifications for account activity</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="remember_devices">
+                                <label class="form-check-label" for="remember_devices">Remember devices (Coming soon)</label>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="mb-4">
+                            <h5><i class="fas fa-sign-out-alt me-2"></i> Sessions</h5>
+                            <p class="text-muted">You're currently logged in on this device. You can log out of all devices by clicking the button below.</p>
+                            <a href="#" class="btn btn-outline-danger">
+                                <i class="fas fa-sign-out-alt me-2"></i> Log Out From All Devices
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Activity Tab -->
+                <div class="tab-pane fade" id="activity" role="tabpanel" aria-labelledby="activity-tab">
+                    <div class="p-4">
+                        <h4 class="mb-4">Recent Activity</h4>
+                        
+                        {% if recent_bookings %}
+                            {% for booking in recent_bookings %}
+                                <div class="activity-card">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>{{ booking.car.brand }} {{ booking.car.model }}</strong>
+                                        <span class="activity-time">{{ booking.date_created|date:"M d, Y" }}</span>
+                                    </div>
+                                    <p class="mb-1">
+                                        You made a booking for {{ booking.date_get|date:"M d, Y" }} to {{ booking.date_return|date:"M d, Y" }}.
+                                        Status: <span class="fw-bold text-{{ booking.status }}">{{ booking.get_status_display }}</span>
+                                    </p>
+                                    <a href="{% url 'car_detail' booking.car.id %}" class="btn btn-sm btn-outline-primary">View Car</a>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-calendar-times fa-3x mb-3 text-muted"></i>
+                                <p>No recent activities to display.</p>
+                                <a href="{% url 'car_list' %}" class="btn btn-primary">Browse Cars</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

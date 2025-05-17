@@ -109,6 +109,29 @@
         color: var(--secondary-color);
         margin-bottom: 20px;
     }
+    
+    .admin-actions {
+        margin-bottom: 20px;
+    }
+    
+    .car-admin-controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        display: flex;
+        gap: 5px;
+    }
+    
+    .car-admin-controls .btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
 </style>
 {% endblock %}
 
@@ -122,6 +145,17 @@
 </div>
 
 <div class="container">
+    {% if user.role >= 2 %}
+    <!-- Admin Actions -->
+    <div class="row admin-actions">
+        <div class="col-md-12 text-end">
+            <a href="{% url 'add_car' %}" class="btn btn-success">
+                <i class="fas fa-plus-circle me-2"></i>Add New Car
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
     <!-- Filters Section -->
     <div class="row mb-4">
         <div class="col-md-12">
@@ -179,6 +213,17 @@
                 <div class="col-md-4">
                     <div class="card car-card">
                         <div class="position-relative">
+                            {% if user.role >= 2 %}
+                            <div class="car-admin-controls">
+                                <a href="{% url 'edit_car' car.id %}" class="btn btn-sm btn-warning" title="Edit Car">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'delete_car' car.id %}" class="btn btn-sm btn-danger" title="Delete Car" onclick="return confirm('Are you sure you want to delete this car?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                            {% endif %}
+                            
                             {% if car.image %}
                                 <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" class="card-img-top car-image">
                             {% else %}

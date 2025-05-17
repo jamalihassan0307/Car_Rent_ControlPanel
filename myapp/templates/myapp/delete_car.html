@@ -1,0 +1,90 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Delete Car - Car Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-car-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1563720223809-b9c9c4f9d9e9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&h=400&q=80');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .confirmation-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .warning-text {
+        color: #dc3545;
+        font-weight: bold;
+        margin: 30px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Delete Car Header -->
+<div class="delete-car-header">
+    <div class="container">
+        <h1>Delete Car</h1>
+        <p class="lead">Confirm deletion of {{ car.brand }} {{ car.model }}</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="confirmation-container">
+                <h2>Are you sure you want to delete this car?</h2>
+                
+                <div class="my-4">
+                    {% if car.image %}
+                        <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" style="max-height: 200px; border-radius: 10px;">
+                    {% else %}
+                        <img src="https://images.unsplash.com/photo-1542362567-b07e54358753?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80" alt="{{ car.brand }} {{ car.model }}" style="max-height: 200px; border-radius: 10px;">
+                    {% endif %}
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ car.brand }} {{ car.model }} ({{ car.year }})</h5>
+                        <p class="card-text">Daily Rate: ${{ car.rate }}</p>
+                        <p class="card-text">Status: {{ car.get_status_display }}</p>
+                        {% if car.description %}
+                            <p class="card-text">{{ car.description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <p class="warning-text">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    This action cannot be undone. All data associated with this car will be permanently deleted.
+                </p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center">
+                        <a href="{% url 'car_list' %}" class="btn btn-secondary me-3">
+                            <i class="fas fa-times me-2"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i> Delete Car
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

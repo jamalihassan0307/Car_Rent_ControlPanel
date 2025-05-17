@@ -1,1 +1,210 @@
- 
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}Home - Car Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://source.unsplash.com/1600x900/?car');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 100px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+    }
+    
+    .hero h1 {
+        font-size: 3rem;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    .hero p {
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin: 0 auto 30px;
+    }
+    
+    .hero .btn {
+        font-size: 1.1rem;
+        padding: 10px 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .section-title {
+        color: var(--primary-color);
+        margin-bottom: 30px;
+        position: relative;
+        padding-bottom: 15px;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: var(--accent-color);
+    }
+    
+    .feature-box {
+        background-color: var(--secondary-color);
+        color: white;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 30px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .feature-box:hover {
+        background-color: var(--primary-color);
+        transform: translateY(-5px);
+    }
+    
+    .feature-box i {
+        font-size: 40px;
+        margin-bottom: 15px;
+        color: var(--light-color);
+    }
+    
+    .car-card {
+        margin-bottom: 30px;
+    }
+    
+    .car-image {
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .car-brand {
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+    
+    .car-price {
+        font-weight: bold;
+        color: var(--accent-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero text-center">
+    <div class="container">
+        <h1 class="mb-4">Premium Car Rental Service</h1>
+        <p class="mb-4">Experience the freedom of driving premium cars at affordable rates. Book now and embark on your journey!</p>
+        <a href="{% url 'car_list' %}" class="btn btn-primary btn-lg me-3">Browse Cars</a>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" class="btn btn-secondary btn-lg">Register Now</a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features mb-5">
+    <div class="container">
+        <h2 class="section-title">Why Choose Us?</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <i class="fas fa-car"></i>
+                    <h3>Wide Selection</h3>
+                    <p>Choose from our diverse fleet of well-maintained vehicles.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <i class="fas fa-dollar-sign"></i>
+                    <h3>Best Rates</h3>
+                    <p>Competitive pricing with no hidden fees or charges.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <i class="fas fa-headset"></i>
+                    <h3>24/7 Support</h3>
+                    <p>Our customer service team is always ready to assist you.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Cars Section -->
+<section class="featured-cars mb-5">
+    <div class="container">
+        <h2 class="section-title">Featured Cars</h2>
+        <div class="row">
+            {% if featured_cars %}
+                {% for car in featured_cars %}
+                    <div class="col-md-3">
+                        <div class="card car-card">
+                            {% if car.image %}
+                                <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" class="card-img-top car-image">
+                            {% else %}
+                                <img src="https://source.unsplash.com/500x300/?car,{{ car.brand }}" alt="{{ car.brand }} {{ car.model }}" class="card-img-top car-image">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title car-brand">{{ car.brand }} {{ car.model }}</h5>
+                                <p class="card-text car-price">${{ car.rate }}/day</p>
+                                <a href="{% url 'car_detail' car.id %}" class="btn btn-sm btn-primary">View Details</a>
+                                {% if user.is_authenticated %}
+                                    <a href="{% url 'add_booking' car.id %}" class="btn btn-sm btn-secondary">Book Now</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center">
+                    <p>No featured cars available at the moment.</p>
+                </div>
+            {% endif %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'car_list' %}" class="btn btn-primary">View All Cars</a>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works mb-5">
+    <div class="container">
+        <h2 class="section-title">How It Works</h2>
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-search fa-3x mb-3" style="color: var(--primary-color);"></i>
+                        <h4>1. Search</h4>
+                        <p>Browse our collection of cars and choose the one that suits your needs.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-check fa-3x mb-3" style="color: var(--primary-color);"></i>
+                        <h4>2. Book</h4>
+                        <p>Select your dates and complete the booking process online.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <i class="fas fa-car-side fa-3x mb-3" style="color: var(--primary-color);"></i>
+                        <h4>3. Enjoy</h4>
+                        <p>Pick up your car and enjoy your journey with peace of mind.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

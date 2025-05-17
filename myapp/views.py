@@ -285,11 +285,24 @@ def add_booking(request, car_id):
         messages.error(request, "Sorry, this car is not available for booking.")
         return redirect('car_detail', car_id=car.id)
     
+    # For admin and entry operator, get list of users for dropdown
+    users = None
+    if is_admin(request.user) or is_entry_operator(request.user):
+        users = User.objects.all().order_by('username')
+    
     if request.method == 'POST':
         form = BookingForm(request.POST)
         if form.is_valid():
             booking = form.save(commit=False)
-            booking.user = request.user
+            
+            # For admin and entry operator, use selected user
+            if (is_admin(request.user) or is_entry_operator(request.user)) and 'user' in request.POST:
+                user_id = request.POST.get('user')
+                booking_user = get_object_or_404(User, id=user_id)
+                booking.user = booking_user
+            else:
+                booking.user = request.user
+                
             booking.car = car
             booking.status = 'pending'
             booking.save()
@@ -308,7 +321,11 @@ def add_booking(request, car_id):
     else:
         form = BookingForm()
     
-    return render(request, 'myapp/add_booking.html', {'form': form, 'car': car})
+    return render(request, 'myapp/add_booking.html', {
+        'form': form, 
+        'car': car,
+        'users': users
+    })
 
 @login_required
 def cancel_booking(request, booking_id):

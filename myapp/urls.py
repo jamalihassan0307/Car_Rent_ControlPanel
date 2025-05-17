@@ -12,7 +12,7 @@ urlpatterns = [
     # Authentication
     path('login/', views.user_login, name='login'),
     path('register/', views.register, name='register'),
-    path('logout/', auth_views.LogoutView.as_view(template_name='myapp/login.html'), name='logout'),
+    path('logout/', auth_views.LogoutView.as_view(template_name='myapp/login.html', next_page='home'), name='logout'),
     
     # Password management
     path('password_change/', auth_views.PasswordChangeView.as_view(template_name='myapp/password_change_form.html'), name='password_change'),

@@ -83,6 +83,15 @@
         border-radius: 10px;
         display: none;
     }
+    
+    .user-restricted-message {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
 </style>
 {% endblock %}
 
@@ -124,7 +133,18 @@
                     </div>
                 </div>
                 
-                <!-- Booking Form -->
+                {% if user.role == 1 %}
+                <!-- Message for normal users -->
+                <div class="user-restricted-message">
+                    <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
+                    <h4>Booking Not Available</h4>
+                    <p>Normal users cannot make direct bookings. Please check your current bookings instead.</p>
+                    <a href="{% url 'my_bookings' %}" class="btn btn-primary mt-2">
+                        <i class="fas fa-list me-2"></i> View My Bookings
+                    </a>
+                </div>
+                {% else %}
+                <!-- Booking Form for Admin and Entry Operator -->
                 <h2 class="section-title">Reservation Details</h2>
                 <form method="post" id="booking-form">
                     {% csrf_token %}
@@ -135,6 +155,19 @@
                                 {{ error }}
                             {% endfor %}
                         </div>
+                    {% endif %}
+                    
+                    {% if user.role == 2 or user.role == 4 %}
+                    <!-- User Selection Dropdown for Admin and Entry Operator -->
+                    <div class="mb-3">
+                        <label for="id_user" class="form-label">Select User*</label>
+                        <select name="user" id="id_user" class="form-select" required>
+                            <option value="">-- Select a user --</option>
+                            {% for user_option in users %}
+                                <option value="{{ user_option.id }}">{{ user_option.username }} ({{ user_option.get_full_name|default:user_option.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     {% endif %}
                     
                     <div class="row mb-3">
@@ -173,6 +206,7 @@
                         </button>
                     </div>
                 </form>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -188,48 +222,51 @@
         const costAmountSpan = document.getElementById('cost-amount');
         const daysCalculationDiv = document.getElementById('days-calculation');
         
-        // Set minimum dates to today
-        const today = new Date();
-        const todayFormatted = today.toISOString().split('T')[0];
-        dateGetInput.min = todayFormatted;
-        dateReturnInput.min = todayFormatted;
-        
-        // Calculate total cost when dates change
-        function calculateTotalCost() {
-            const dateGet = new Date(dateGetInput.value);
-            const dateReturn = new Date(dateReturnInput.value);
+        // Only run if form exists (for admin/entry operator)
+        if (dateGetInput && dateReturnInput) {
+            // Set minimum dates to today
+            const today = new Date();
+            const todayFormatted = today.toISOString().split('T')[0];
+            dateGetInput.min = todayFormatted;
+            dateReturnInput.min = todayFormatted;
             
-            if (dateGetInput.value && dateReturnInput.value) {
-                // Calculate days difference
-                const timeDiff = dateReturn - dateGet;
-                const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            // Calculate total cost when dates change
+            function calculateTotalCost() {
+                const dateGet = new Date(dateGetInput.value);
+                const dateReturn = new Date(dateReturnInput.value);
                 
-                if (days > 0) {
-                    // Calculate cost
-                    const dailyRate = {{ car.rate }};
-                    const totalCost = days * dailyRate;
+                if (dateGetInput.value && dateReturnInput.value) {
+                    // Calculate days difference
+                    const timeDiff = dateReturn - dateGet;
+                    const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
                     
-                    // Update display
-                    costAmountSpan.textContent = '$' + totalCost.toFixed(2);
-                    daysCalculationDiv.textContent = days + ' days × $' + dailyRate + '/day';
-                    totalCostDiv.style.display = 'block';
-                } else {
-                    totalCostDiv.style.display = 'none';
-                    if (days < 0) {
-                        alert('Return date must be after pickup date');
-                        dateReturnInput.value = '';
+                    if (days > 0) {
+                        // Calculate cost
+                        const dailyRate = {{ car.rate }};
+                        const totalCost = days * dailyRate;
+                        
+                        // Update display
+                        costAmountSpan.textContent = '$' + totalCost.toFixed(2);
+                        daysCalculationDiv.textContent = days + ' days × $' + dailyRate + '/day';
+                        totalCostDiv.style.display = 'block';
+                    } else {
+                        totalCostDiv.style.display = 'none';
+                        if (days < 0) {
+                            alert('Return date must be after pickup date');
+                            dateReturnInput.value = '';
+                        }
                     }
                 }
             }
+            
+            dateGetInput.addEventListener('change', function() {
+                // Update return date minimum
+                dateReturnInput.min = dateGetInput.value;
+                calculateTotalCost();
+            });
+            
+            dateReturnInput.addEventListener('change', calculateTotalCost);
         }
-        
-        dateGetInput.addEventListener('change', function() {
-            // Update return date minimum
-            dateReturnInput.min = dateGetInput.value;
-            calculateTotalCost();
-        });
-        
-        dateReturnInput.addEventListener('change', calculateTotalCost);
     });
 </script>
 {% endblock %} 

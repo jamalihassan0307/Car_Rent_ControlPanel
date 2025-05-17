@@ -335,7 +335,6 @@
         if (markAllReadBtn) {
             markAllReadBtn.addEventListener('click', function() {
                 if (confirm('Are you sure you want to mark all messages as read?')) {
-                    window.location.href = "{% url 'mark_all_messages_read' %}";
                 }
             });
         }

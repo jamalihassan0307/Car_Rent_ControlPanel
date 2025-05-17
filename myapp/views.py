@@ -181,12 +181,23 @@ def dashboard(request):
 @login_required
 def logout_view(request):
     """
-    Custom logout view that handles both GET and POST requests.
-    This overrides Django's default LogoutView which only accepts POST.
+    Completely redesigned logout view using a more direct approach.
+    This will work with all request methods and ensure the user is properly logged out.
     """
-    # Log the user out regardless of request method
-    logout(request)
-    messages.success(request, 'Successfully logged out!')
+    from django.contrib.auth import logout as auth_logout
+    from django.contrib.auth.signals import user_logged_out
+    
+    # Get the user before logging out
+    user = request.user
+    
+    # Perform the logout
+    auth_logout(request)
+    
+    # Manually trigger the user_logged_out signal (normally handled by auth_logout)
+    user_logged_out.send(sender=user.__class__, request=request, user=user)
+    
+    # Add success message and redirect
+    messages.success(request, 'You have been successfully logged out.')
     return redirect('login')
 
 @login_required

@@ -73,7 +73,7 @@ class RentDetail(models.Model):
     def duration(self):
         """Calculate the number of days between pickup and return dates."""
         delta = self.date_return - self.date_get
-        return delta.days + 1  # Include both the pickup and return days
+        return delta.days + 1  
         
     @property
     def total_cost(self):

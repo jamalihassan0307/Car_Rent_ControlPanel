@@ -2,12 +2,12 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User, UserProfile, Car, RentDetail, ContactMessage
 
-# Customize the admin panel
+
 admin.site.site_header = 'Car Rental System Admin'
 admin.site.site_title = 'Car Rental Admin Portal'
 admin.site.index_title = 'Welcome to Car Rental Admin Portal'
 
-# User Admin with UserProfile inline
+
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
@@ -49,7 +49,7 @@ class ContactMessageAdmin(admin.ModelAdmin):
     
     actions = ['mark_as_read']
 
-# Register your models here
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Car, CarAdmin)
 admin.site.register(RentDetail, RentDetailAdmin)

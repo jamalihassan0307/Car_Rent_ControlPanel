@@ -530,3 +530,27 @@ def mark_message_read(request, message_id):
     
     messages.success(request, "Message marked as read!")
     return redirect('message_list')
+
+@login_required
+def mark_all_messages_read(request):
+    # Only admin can mark all messages as read
+    if not is_admin(request.user):
+        return HttpResponseForbidden("You don't have permission to access this page.")
+    
+    # Update all unread messages
+    ContactMessage.objects.filter(is_read=False).update(is_read=True)
+    
+    messages.success(request, "All messages marked as read!")
+    return redirect('message_list')
+
+@login_required
+def delete_message(request, message_id):
+    # Only admin can delete messages
+    if not is_admin(request.user):
+        return HttpResponseForbidden("You don't have permission to access this page.")
+    
+    message = get_object_or_404(ContactMessage, id=message_id)
+    message.delete()
+    
+    messages.success(request, "Message deleted successfully!")
+    return redirect('message_list')

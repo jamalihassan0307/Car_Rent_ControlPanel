@@ -142,6 +142,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'user_list' %}">Users</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'car_list' %}">Manage Cars</a>
+                            </li>
                         {% elif user.role == 4 %}
                             <!-- Entry Operator links -->
                             <li class="nav-item">

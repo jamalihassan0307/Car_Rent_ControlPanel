@@ -1,0 +1,282 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}{{ car.brand }} {{ car.model }} - Car Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .car-detail-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&h=400&q=80');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .car-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+        overflow: hidden;
+    }
+    
+    .car-image-container {
+        height: 400px;
+        overflow: hidden;
+    }
+    
+    .car-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .car-details {
+        padding: 30px;
+    }
+    
+    .car-title {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+    }
+    
+    .car-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--accent-color);
+        margin-bottom: 20px;
+    }
+    
+    .car-status {
+        display: inline-block;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    
+    .status-available {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-rented {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-maintenance {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .car-description {
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+    
+    .car-features {
+        margin-bottom: 30px;
+    }
+    
+    .feature-item {
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .feature-item i {
+        margin-right: 10px;
+        color: var(--primary-color);
+    }
+    
+    .action-buttons {
+        margin-top: 30px;
+    }
+    
+    .action-buttons .btn {
+        margin-right: 10px;
+        margin-bottom: 10px;
+        padding: 10px 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Car Detail Header -->
+<div class="car-detail-header">
+    <div class="container">
+        <h1>{{ car.brand }} {{ car.model }}</h1>
+        <p class="lead">Detailed information about this vehicle</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Car Details Section -->
+        <div class="col-md-8">
+            <div class="car-container">
+                <div class="car-image-container">
+                    {% if car.image %}
+                        <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" class="car-image">
+                    {% else %}
+                        <img src="https://images.unsplash.com/photo-1542362567-b07e54358753?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=400&q=80" alt="{{ car.brand }} {{ car.model }}" class="car-image">
+                    {% endif %}
+                </div>
+                
+                <div class="car-details">
+                    <h2 class="car-title">{{ car.brand }} {{ car.model }}</h2>
+                    <p class="car-price">${{ car.rate }}/day</p>
+                    
+                    <div class="car-status status-{{ car.status }}">
+                        {{ car.get_status_display }}
+                    </div>
+                    
+                    <h4>Description</h4>
+                    <div class="car-description">
+                        {{ car.description|linebreaks }}
+                    </div>
+                    
+                    <h4>Car Features</h4>
+                    <div class="car-features">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="feature-item">
+                                    <i class="fas fa-car"></i>
+                                    <span>Brand: {{ car.brand }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="feature-item">
+                                    <i class="fas fa-tag"></i>
+                                    <span>Model: {{ car.model }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="feature-item">
+                                    <i class="fas fa-tag"></i>
+                                    <span>Daily Rate: ${{ car.rate }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="feature-item">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>Status: {{ car.get_status_display }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <a href="{% url 'car_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Back to Cars
+                        </a>
+                        
+                        {% if car.status == 'available' and user.is_authenticated %}
+                            {% if user.role == 1 %}
+                                <a href="{% url 'my_bookings' %}" class="btn btn-primary">
+                                    <i class="fas fa-list me-2"></i> My Bookings
+                                </a>
+                            {% else %}
+                                <a href="{% url 'add_booking' car.id %}" class="btn btn-primary">
+                                    <i class="fas fa-calendar-plus me-2"></i> Book Now
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                        
+                        {% if user.role >= 2 %}
+                            <a href="{% url 'edit_car' car.id %}" class="btn btn-warning">
+                                <i class="fas fa-edit me-2"></i> Edit Car
+                            </a>
+                            <a href="{% url 'delete_car' car.id %}" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i> Delete Car
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Quick Info Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Quick Info</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Brand
+                            <span class="fw-bold">{{ car.brand }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Model
+                            <span class="fw-bold">{{ car.model }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Daily Rate
+                            <span class="fw-bold">${{ car.rate }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Status
+                            <span class="badge bg-{% if car.status == 'available' %}success{% elif car.status == 'rented' %}danger{% else %}warning{% endif %} rounded-pill">
+                                {{ car.get_status_display }}
+                            </span>
+                        </li>
+                    </ul>
+                    
+                    {% if car.status == 'available' and user.is_authenticated %}
+                        <div class="d-grid gap-2 mt-3">
+                            {% if user.role == 1 %}
+                                <a href="{% url 'my_bookings' %}" class="btn btn-primary">
+                                    <i class="fas fa-list me-2"></i> My Bookings
+                                </a>
+                            {% else %}
+                                <a href="{% url 'add_booking' car.id %}" class="btn btn-primary">
+                                    <i class="fas fa-calendar-plus me-2"></i> Book Now
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% elif car.status == 'rented' %}
+                        <div class="alert alert-danger mt-3 mb-0">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            This car is currently rented and not available for booking.
+                        </div>
+                    {% elif car.status == 'maintenance' %}
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <i class="fas fa-tools me-2"></i>
+                            This car is under maintenance and not available for booking.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Need Help Card -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Need Help?</h5>
+                </div>
+                <div class="card-body">
+                    <p>If you have any questions about this car or the booking process, feel free to contact us.</p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'contact' %}" class="btn btn-info">
+                            <i class="fas fa-envelope me-2"></i> Contact Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

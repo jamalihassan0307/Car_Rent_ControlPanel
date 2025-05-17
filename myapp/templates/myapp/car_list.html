@@ -6,7 +6,7 @@
 {% block extra_css %}
 <style>
     .car-listing-header {
-        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://source.unsplash.com/1600x400/?car,luxury');
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1556910103-1c02745aae4d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&h=400&q=80');
         background-size: cover;
         background-position: center;
         color: white;
@@ -182,7 +182,7 @@
                             {% if car.image %}
                                 <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" class="card-img-top car-image">
                             {% else %}
-                                <img src="https://source.unsplash.com/500x300/?car,{{ car.brand }}" alt="{{ car.brand }} {{ car.model }}" class="card-img-top car-image">
+                                <img src="https://images.unsplash.com/photo-1542362567-b07e54358753?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80" alt="{{ car.brand }} {{ car.model }}" class="card-img-top car-image">
                             {% endif %}
                             
                             <span class="car-status status-{{ car.status }}">

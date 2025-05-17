@@ -194,7 +194,33 @@ def profile(request, user_id=None):
     if profile_user != request.user and not (is_admin(request.user) or is_resource_manager(request.user)):
         return HttpResponseForbidden("You don't have permission to view this profile.")
     
-    return render(request, 'myapp/profile.html', {'user': profile_user})
+    # If this is a POST request, process the form data
+    if request.method == 'POST' and profile_user == request.user:
+        # Update user basic info
+        profile_user.first_name = request.POST.get('first_name', '')
+        profile_user.last_name = request.POST.get('last_name', '')
+        profile_user.email = request.POST.get('email', '')
+        
+        # Update profile info
+        profile_user.profile.phone = request.POST.get('phone', '')
+        profile_user.profile.address = request.POST.get('address', '')
+        profile_user.profile.city = request.POST.get('city', '')
+        profile_user.profile.country = request.POST.get('country', '')
+        
+        # Save changes
+        profile_user.save()
+        profile_user.profile.save()
+        
+        messages.success(request, "Profile updated successfully!")
+        return redirect('profile')
+    
+    # Get recent bookings for the activity tab
+    recent_bookings = RentDetail.objects.filter(user=profile_user).order_by('-date_created')[:5]
+    
+    return render(request, 'myapp/profile.html', {
+        'user': profile_user,
+        'recent_bookings': recent_bookings
+    })
 
 @login_required
 def edit_profile(request):

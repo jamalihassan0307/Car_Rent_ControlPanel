@@ -1,0 +1,309 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+
+{% block title %}My Bookings - Car Rental System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bookings-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://source.unsplash.com/1600x400/?car,booking');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 30px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .bookings-empty {
+        text-align: center;
+        padding: 50px 20px;
+    }
+    
+    .bookings-empty i {
+        font-size: 4rem;
+        color: var(--secondary-color);
+        margin-bottom: 20px;
+    }
+    
+    .booking-card {
+        margin-bottom: 25px;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .booking-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .booking-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 15px 20px;
+    }
+    
+    .booking-header.pending {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .booking-header.approved {
+        background-color: #28a745;
+    }
+    
+    .booking-header.returned {
+        background-color: #17a2b8;
+    }
+    
+    .booking-header.cancelled {
+        background-color: #dc3545;
+    }
+    
+    .booking-dates {
+        margin-top: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .car-details {
+        padding: 15px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .car-image {
+        width: 120px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 5px;
+        margin-right: 15px;
+    }
+    
+    .booking-footer {
+        background-color: #f8f9fa;
+        border-top: 1px solid #eee;
+        padding: 15px;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-approved {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-returned {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .status-cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .total-cost {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+    
+    .action-buttons .btn {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Bookings Header -->
+<div class="bookings-header">
+    <div class="container">
+        <h1>My Bookings</h1>
+        <p class="lead">Manage and track all your car rental reservations</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="status" class="form-label">Filter by Status</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="">All Bookings</option>
+                                <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Approved</option>
+                                <option value="returned" {% if request.GET.status == 'returned' %}selected{% endif %}>Returned</option>
+                                <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="sort" class="form-label">Sort By</label>
+                            <select name="sort" id="sort" class="form-select">
+                                <option value="date_created" {% if request.GET.sort == 'date_created' or not request.GET.sort %}selected{% endif %}>Date Created (Newest First)</option>
+                                <option value="date_get" {% if request.GET.sort == 'date_get' %}selected{% endif %}>Pickup Date</option>
+                                <option value="car__brand" {% if request.GET.sort == 'car__brand' %}selected{% endif %}>Car Brand</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter me-2"></i> Apply Filters
+                                </button>
+                                <a href="{% url 'my_bookings' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-redo me-2"></i> Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bookings List -->
+    <div class="row">
+        {% if bookings %}
+            {% for booking in bookings %}
+                <div class="col-md-6">
+                    <div class="booking-card card">
+                        <div class="booking-header {{ booking.status }}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Booking #{{ booking.id }}</h5>
+                                <span class="status-badge status-{{ booking.status }}">
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="booking-dates">
+                                <i class="fas fa-calendar-alt me-2"></i> {{ booking.date_get|date:"M d, Y" }} to {{ booking.date_return|date:"M d, Y" }}
+                            </div>
+                        </div>
+                        
+                        <div class="car-details">
+                            {% if booking.car.image %}
+                                <img src="{{ booking.car.image.url }}" alt="{{ booking.car.brand }} {{ booking.car.model }}" class="car-image">
+                            {% else %}
+                                <img src="https://source.unsplash.com/120x80/?car,{{ booking.car.brand }}" alt="{{ booking.car.brand }} {{ booking.car.model }}" class="car-image">
+                            {% endif %}
+                            
+                            <div>
+                                <h5 class="mb-1">{{ booking.car.brand }} {{ booking.car.model }}</h5>
+                                <p class="mb-0 text-muted">
+                                    <i class="fas fa-tag me-1"></i> ${{ booking.car.rate }}/day
+                                </p>
+                                <small class="text-muted">Created on {{ booking.date_created|date:"M d, Y" }}</small>
+                            </div>
+                        </div>
+                        
+                        <div class="booking-footer">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="total-cost mb-2">
+                                        Total: ${{ booking.total_cost }}
+                                    </div>
+                                    <p class="mb-0">
+                                        <small class="text-muted">
+                                            {{ booking.duration }} days × ${{ booking.car.rate }}/day
+                                        </small>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="action-buttons text-md-end">
+                                        <a href="{% url 'car_detail' booking.car.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-car me-1"></i> View Car
+                                        </a>
+                                        
+                                        {% if booking.status == 'pending' %}
+                                            <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-times me-1"></i> Cancel
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-md-12">
+                <div class="bookings-empty">
+                    <i class="fas fa-calendar-times"></i>
+                    <h3>No Bookings Found</h3>
+                    <p class="text-muted mb-4">You don't have any car rental bookings yet.</p>
+                    <a href="{% url 'car_list' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-search me-2"></i> Browse Cars to Book
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if bookings.has_other_pages %}
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <nav aria-label="Bookings pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if bookings.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ bookings.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for i in bookings.paginator.page_range %}
+                            {% if bookings.number == i %}
+                                <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="?page={{ i }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if bookings.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ bookings.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

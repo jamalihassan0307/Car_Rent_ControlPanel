@@ -6,7 +6,7 @@
 {% block extra_css %}
 <style>
     .messages-header {
-        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://source.unsplash.com/1600x400/?mail,contact');
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&h=400&q=80');
         background-size: cover;
         background-position: center;
         color: white;
@@ -206,19 +206,19 @@
     
     <!-- Messages List -->
     <div class="row">
-        {% if messages %}
+        {% if messages_list %}
             <div class="col-md-12">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4>{{ messages|length }} Messages</h4>
+                    <h4>{{ messages_list|length }} Messages</h4>
                     <div>
-                        <button class="btn btn-outline-primary btn-sm mark-all-read-btn">
+                        <a href="{% url 'mark_all_messages_read' %}" class="btn btn-outline-primary btn-sm" onclick="return confirm('Are you sure you want to mark all messages as read?')">
                             <i class="fas fa-check-double me-1"></i> Mark All as Read
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
             
-            {% for message in messages %}
+            {% for message in messages_list %}
                 <div class="col-md-12">
                     <div class="message-card card">
                         <div class="card-header {% if message.is_read %}read{% endif %}">
@@ -238,7 +238,7 @@
                                     {% if message.user.userprofile.photo %}
                                         <img src="{{ message.user.userprofile.photo.url }}" alt="{{ message.user.username }}">
                                     {% else %}
-                                        <img src="https://source.unsplash.com/40x40/?person" alt="{{ message.user.username }}">
+                                        <img src="https://images.unsplash.com/photo-1511367461989-f85a21fda167?ixlib=rb-1.2.1&auto=format&fit=crop&w=40&h=40&q=80" alt="{{ message.user.username }}">
                                     {% endif %}
                                     <div>
                                         <strong>{{ message.user.get_full_name|default:message.user.username }}</strong>
@@ -271,13 +271,13 @@
             {% endfor %}
             
             <!-- Pagination -->
-            {% if messages.has_other_pages %}
+            {% if messages_list.has_other_pages %}
                 <div class="col-md-12">
                     <nav aria-label="Messages pagination">
                         <ul class="pagination justify-content-center mt-4">
-                            {% if messages.has_previous %}
+                            {% if messages_list.has_previous %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ messages.previous_page_number }}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}{% if request.GET.user %}&user={{ request.GET.user }}{% endif %}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}" aria-label="Previous">
+                                    <a class="page-link" href="?page={{ messages_list.previous_page_number }}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}{% if request.GET.user %}&user={{ request.GET.user }}{% endif %}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
@@ -289,17 +289,17 @@
                                 </li>
                             {% endif %}
                             
-                            {% for i in messages.paginator.page_range %}
-                                {% if messages.number == i %}
+                            {% for i in messages_list.paginator.page_range %}
+                                {% if messages_list.number == i %}
                                     <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
                                 {% else %}
                                     <li class="page-item"><a class="page-link" href="?page={{ i }}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}{% if request.GET.user %}&user={{ request.GET.user }}{% endif %}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}">{{ i }}</a></li>
                                 {% endif %}
                             {% endfor %}
                             
-                            {% if messages.has_next %}
+                            {% if messages_list.has_next %}
                                 <li class="page-item">
-                                    <a class="page-link" href="?page={{ messages.next_page_number }}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}{% if request.GET.user %}&user={{ request.GET.user }}{% endif %}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}" aria-label="Next">
+                                    <a class="page-link" href="?page={{ messages_list.next_page_number }}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}{% if request.GET.user %}&user={{ request.GET.user }}{% endif %}{% if request.GET.subject %}&subject={{ request.GET.subject }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}" aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>
                                     </a>
                                 </li>
@@ -329,16 +329,7 @@
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Mark all messages as read
-        const markAllReadBtn = document.querySelector('.mark-all-read-btn');
-        if (markAllReadBtn) {
-            markAllReadBtn.addEventListener('click', function() {
-                if (confirm('Are you sure you want to mark all messages as read?')) {
-                }
-            });
-        }
-    });
+    // No need for custom JavaScript since we're using a direct link with confirmation
 </script>
 {% endblock %}
 {% endblock %} 

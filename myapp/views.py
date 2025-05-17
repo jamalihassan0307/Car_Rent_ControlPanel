@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseForbidden
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate , logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.db.models import Count, Q
@@ -180,6 +180,11 @@ def dashboard(request):
     
     return render(request, 'myapp/dashboard.html', context)
 
+@login_required
+def logout_view(request):
+    logout(request)
+    messages.success(request, 'Successfully logged out!')
+    return redirect('login')
 
 @login_required
 def profile(request, user_id=None):

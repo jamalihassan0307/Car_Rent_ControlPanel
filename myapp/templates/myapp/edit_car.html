@@ -122,7 +122,7 @@
                         <div class="col-md-6">
                             <label for="id_year" class="form-label">Year*</label>
                             {{ form.year.errors }}
-                            <input type="number" name="year" id="id_year" class="form-control" value="{{ form.year.value|default:car.year }}" required>
+                            <input type="number" name="year" id="id_year" class="form-control" value="{{ form.year.value|default:'' }}" required>
                         </div>
                         <div class="col-md-6">
                             <label for="id_rate" class="form-label">Daily Rate ($)*</label>

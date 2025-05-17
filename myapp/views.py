@@ -1,13 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import  HttpResponseForbidden
 from django.contrib.auth import login, authenticate , logout
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Count, Q
-from django.utils import timezone
-from django.urls import reverse
 
-from .models import User, UserProfile, Car, RentDetail, ContactMessage
+from .models import User, Car, RentDetail, ContactMessage
 from .forms import UserRegistrationForm, UserLoginForm, UserProfileForm, CarForm, BookingForm, ContactForm, UserForm
 
 
@@ -182,9 +180,12 @@ def dashboard(request):
 
 @login_required
 def logout_view(request):
-    logout(request)
-    messages.success(request, 'Successfully logged out!')
-    return redirect('login')
+    # Handle both GET and POST requests
+    if request.method == 'GET' or request.method == 'POST':
+        logout(request)
+        messages.success(request, 'Successfully logged out!')
+        return redirect('login')
+    return HttpResponseForbidden("Invalid request method.")
 
 @login_required
 def profile(request, user_id=None):

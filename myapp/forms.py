@@ -30,7 +30,7 @@ class UserForm(forms.ModelForm):
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ['phone']
+        fields = ['phone', 'address', 'city', 'country', 'email_notifications', 'remember_devices']
 
 class CarForm(forms.ModelForm):
     class Meta:

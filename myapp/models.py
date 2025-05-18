@@ -21,6 +21,11 @@ class User(AbstractUser):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     phone = models.CharField(max_length=20, blank=True)
+    address = models.TextField(blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    email_notifications = models.BooleanField(default=True)
+    remember_devices = models.BooleanField(default=False)
     
     def __str__(self):
         return f"{self.user.username}'s Profile"

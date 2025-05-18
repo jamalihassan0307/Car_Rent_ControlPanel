@@ -262,17 +262,25 @@
                         
                         <hr>
                         
-                        <div class="mb-4">
-                            <h5><i class="fas fa-shield-alt me-2"></i> Account Security</h5>
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="email_notifications" checked>
-                                <label class="form-check-label" for="email_notifications">Email notifications for account activity</label>
+                        <form method="post" action="{% url 'profile' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="tab" value="security">
+                            <div class="mb-4">
+                                <h5><i class="fas fa-shield-alt me-2"></i> Account Security</h5>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="email_notifications" name="email_notifications" {% if user.profile.email_notifications %}checked{% endif %}>
+                                    <label class="form-check-label" for="email_notifications">Email notifications for account activity</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="remember_devices" name="remember_devices" {% if user.profile.remember_devices %}checked{% endif %}>
+                                    <label class="form-check-label" for="remember_devices">Remember devices (Coming soon)</label>
+                                </div>
                             </div>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="remember_devices">
-                                <label class="form-check-label" for="remember_devices">Remember devices (Coming soon)</label>
-                            </div>
-                        </div>
+                            
+                            <button type="submit" class="btn btn-primary mb-4">
+                                <i class="fas fa-save me-2"></i> Save Security Settings
+                            </button>
+                        </form>
                         
                         <hr>
                         

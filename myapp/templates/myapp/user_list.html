@@ -157,9 +157,7 @@
                 <p class="lead mb-0">View and manage all users in the system</p>
             </div>
             <div class="col-md-4 text-md-end">
-                <a href="{% url 'add_user' %}" class="btn btn-success">
-                    <i class="fas fa-user-plus me-2"></i> Add New User
-                </a>
+               
                 <a href="{% url 'dashboard' %}" class="btn btn-outline-light ms-2">
                     <i class="fas fa-tachometer-alt me-2"></i> Dashboard
                 </a>
@@ -271,8 +269,8 @@
                             </div>
                         </div>
                         <div class="card-body text-center">
-                            {% if user.userprofile.photo %}
-                                <img src="{{ user.userprofile.photo.url }}" alt="{{ user.username }}" class="user-image">
+                            {% if user.profile_image %}
+                                <img src="{{ user.profile_image.url }}" alt="{{ user.username }}" class="user-image">
                             {% else %}
                                 <img src="https://source.unsplash.com/100x100/?person" alt="{{ user.username }}" class="user-image">
                             {% endif %}

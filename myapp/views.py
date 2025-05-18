@@ -187,16 +187,16 @@ def logout_view(request):
     from django.contrib.auth import logout as auth_logout
     from django.contrib.auth.signals import user_logged_out
     
-    # Get the user before logging out
+    
     user = request.user
     
-    # Perform the logout
+    
     auth_logout(request)
     
-    # Manually trigger the user_logged_out signal (normally handled by auth_logout)
+    
     user_logged_out.send(sender=user.__class__, request=request, user=user)
     
-    # Add success message and redirect
+    
     messages.success(request, 'You have been successfully logged out.')
     return redirect('login')
 
@@ -214,9 +214,9 @@ def profile(request, user_id=None):
         print(f"POST data: {request.POST}")
         
         if 'tab' in request.POST and request.POST.get('tab') == 'security':
-            # Handle security tab form submission
-            # For checkboxes, we need to check if the key exists in POST data
-            # If the checkbox is unchecked, it won't be in the POST data at all
+            
+            
+            
             profile_user.profile.email_notifications = 'email_notifications' in request.POST
             profile_user.profile.remember_devices = 'remember_devices' in request.POST
             
@@ -227,7 +227,7 @@ def profile(request, user_id=None):
             messages.success(request, "Security settings updated successfully!")
             return redirect('profile')
         elif profile_user == request.user:
-            # Handle profile details tab form submission
+            
             profile_user.first_name = request.POST.get('first_name', '')
             profile_user.last_name = request.POST.get('last_name', '')
             profile_user.email = request.POST.get('email', '')
@@ -281,7 +281,7 @@ def car_detail(request, car_id):
 
 @login_required
 def add_car(request):
-    # Only admin and resource manager can add cars
+    
     if not (is_admin(request.user) or is_resource_manager(request.user)):
         return HttpResponseForbidden("You don't have permission to access this page.")
     
@@ -298,7 +298,7 @@ def add_car(request):
 
 @login_required
 def edit_car(request, car_id):
-    # Only admin and resource manager can edit cars
+    
     if not (is_admin(request.user) or is_resource_manager(request.user)):
         return HttpResponseForbidden("You don't have permission to access this page.")
     
@@ -317,7 +317,7 @@ def edit_car(request, car_id):
 
 @login_required
 def delete_car(request, car_id):
-    # Only admin and resource manager can delete cars
+    
     if not (is_admin(request.user) or is_resource_manager(request.user)):
         return HttpResponseForbidden("You don't have permission to access this page.")
     
@@ -424,18 +424,18 @@ def cancel_booking(request, booking_id):
 
 @login_required
 def manage_bookings(request):
-    # Only admin and entry operator can manage all bookings
+    
     if not (is_admin(request.user) or is_entry_operator(request.user)):
         return HttpResponseForbidden("You don't have permission to access this page.")
     
     bookings = RentDetail.objects.all().order_by('-date_created')
     
-    # Filter by status if provided
+    
     status = request.GET.get('status', None)
     if status:
         bookings = bookings.filter(status=status)
     
-    # Filter by user if provided
+    
     username = request.GET.get('username', None)
     if username:
         bookings = bookings.filter(user__username__icontains=username)
@@ -444,7 +444,7 @@ def manage_bookings(request):
 
 @login_required
 def approve_booking(request, booking_id):
-    # Only admin and entry operator can approve bookings
+    
     if not (is_admin(request.user) or is_entry_operator(request.user)):
         return HttpResponseForbidden("You don't have permission to access this page.")
     
@@ -458,7 +458,7 @@ def approve_booking(request, booking_id):
         booking.status = 'approved'
         booking.save()
         
-        # Update car status
+        
         car = booking.car
         car.status = 'rented'
         car.save()
@@ -470,7 +470,7 @@ def approve_booking(request, booking_id):
 
 @login_required
 def return_car(request, booking_id):
-    # Only admin and entry operator can process returns
+    
     if not (is_admin(request.user) or is_entry_operator(request.user)):
         return HttpResponseForbidden("You don't have permission to access this page.")
     

@@ -211,11 +211,19 @@ def profile(request, user_id=None):
         return HttpResponseForbidden("You don't have permission to view this profile.")
     
     if request.method == 'POST':
+        print(f"POST data: {request.POST}")
+        
         if 'tab' in request.POST and request.POST.get('tab') == 'security':
             # Handle security tab form submission
+            # For checkboxes, we need to check if the key exists in POST data
+            # If the checkbox is unchecked, it won't be in the POST data at all
             profile_user.profile.email_notifications = 'email_notifications' in request.POST
             profile_user.profile.remember_devices = 'remember_devices' in request.POST
+            
+            print(f"Security settings: email_notifications={profile_user.profile.email_notifications}, remember_devices={profile_user.profile.remember_devices}")
+            
             profile_user.profile.save()
+            
             messages.success(request, "Security settings updated successfully!")
             return redirect('profile')
         elif profile_user == request.user:

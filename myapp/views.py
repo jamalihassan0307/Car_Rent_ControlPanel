@@ -203,40 +203,40 @@ def logout_view(request):
 @login_required
 def profile(request, user_id=None):
     if user_id:
-        
         profile_user = get_object_or_404(User, id=user_id)
     else:
-        
         profile_user = request.user
-    
     
     if profile_user != request.user and not (is_admin(request.user) or is_resource_manager(request.user)):
         return HttpResponseForbidden("You don't have permission to view this profile.")
     
-    
-    if request.method == 'POST' and profile_user == request.user:
-        
-        profile_user.first_name = request.POST.get('first_name', '')
-        profile_user.last_name = request.POST.get('last_name', '')
-        profile_user.email = request.POST.get('email', '')
-        
-        
-        if 'profile_photo' in request.FILES:
-            profile_user.profile_image = request.FILES['profile_photo']
-        
-        
-        profile_user.profile.phone = request.POST.get('phone', '')
-        profile_user.profile.address = request.POST.get('address', '')
-        profile_user.profile.city = request.POST.get('city', '')
-        profile_user.profile.country = request.POST.get('country', '')
-        
-        
-        profile_user.save()
-        profile_user.profile.save()
-        
-        messages.success(request, "Profile updated successfully!")
-        return redirect('profile')
-    
+    if request.method == 'POST':
+        if 'tab' in request.POST and request.POST.get('tab') == 'security':
+            # Handle security tab form submission
+            profile_user.profile.email_notifications = 'email_notifications' in request.POST
+            profile_user.profile.remember_devices = 'remember_devices' in request.POST
+            profile_user.profile.save()
+            messages.success(request, "Security settings updated successfully!")
+            return redirect('profile')
+        elif profile_user == request.user:
+            # Handle profile details tab form submission
+            profile_user.first_name = request.POST.get('first_name', '')
+            profile_user.last_name = request.POST.get('last_name', '')
+            profile_user.email = request.POST.get('email', '')
+            
+            if 'profile_photo' in request.FILES:
+                profile_user.profile_image = request.FILES['profile_photo']
+            
+            profile_user.profile.phone = request.POST.get('phone', '')
+            profile_user.profile.address = request.POST.get('address', '')
+            profile_user.profile.city = request.POST.get('city', '')
+            profile_user.profile.country = request.POST.get('country', '')
+            
+            profile_user.save()
+            profile_user.profile.save()
+            
+            messages.success(request, "Profile updated successfully!")
+            return redirect('profile')
     
     recent_bookings = RentDetail.objects.filter(user=profile_user).order_by('-date_created')[:5]
     

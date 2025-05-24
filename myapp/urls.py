@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 from django.contrib.auth import views as auth_views
 
@@ -50,4 +50,5 @@ urlpatterns = [
     path('messages/mark-read/<int:message_id>/', views.mark_message_read, name='mark_message_read'),
     path('messages/mark-all-read/', views.mark_all_messages_read, name='mark_all_messages_read'),
     path('messages/delete/<int:message_id>/', views.delete_message, name='delete_message'),
+    path('social-auth/', include('social_django.urls', namespace='social')),
 ]

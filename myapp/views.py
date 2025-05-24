@@ -96,7 +96,16 @@ def register(request):
     
     return render(request, 'myapp/register.html', {'form': form})
 
+def login_view(request):
+    if request.user.is_authenticated:
+        return render(request, 'login.html')
+    return render(request, 'login.html')
+
+
 def user_login(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+        
     if request.method == 'POST':
         form = UserLoginForm(request.POST)
         if form.is_valid():
@@ -106,7 +115,11 @@ def user_login(request):
             
             if user is not None:
                 login(request, user)
-                
+                # Set session expiry
+                if not request.POST.get('remember_me'):
+                    request.session.set_expiry(0)  # Session expires when browser closes
+                else:
+                    request.session.set_expiry(1209600)  # 2 weeks
                 return redirect('dashboard')
             else:
                 messages.error(request, "Invalid username or password")
@@ -181,21 +194,20 @@ def dashboard(request):
 @login_required
 def logout_view(request):
     """
-    Completely redesigned logout view using a more direct approach.
-    This will work with all request methods and ensure the user is properly logged out.
+    Enhanced logout view with proper session cleanup
     """
-    from django.contrib.auth import logout as auth_logout
-    from django.contrib.auth.signals import user_logged_out
-    
-    
+    # Store user info before logout
     user = request.user
     
+    # Clear all session data
+    request.session.flush()
     
-    auth_logout(request)
+    # Perform logout
+    logout(request)
     
-    
-    user_logged_out.send(sender=user.__class__, request=request, user=user)
-    
+    # Send logout signal
+    from django.contrib.auth.signals import user_logged_out
+    user_logged_out.send(sender=user._class_, request=request, user=user)
     
     messages.success(request, 'You have been successfully logged out.')
     return redirect('login')
@@ -438,7 +450,7 @@ def manage_bookings(request):
     
     username = request.GET.get('username', None)
     if username:
-        bookings = bookings.filter(user__username__icontains=username)
+        bookings = bookings.filter(user_username_icontains=username)
     
     return render(request, 'myapp/manage_bookings.html', {'bookings': bookings})
 
